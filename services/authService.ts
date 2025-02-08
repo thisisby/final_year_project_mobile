@@ -1,0 +1,30 @@
+import axios from "axios";
+
+const API_URL = "http://52.90.107.205/api/v1";
+
+export type LoginCredentials = {
+  email: string;
+  password: string;
+};
+
+type SignupCredentials = {
+  email: string;
+  password: string;
+};
+
+export const login = async (credentials: LoginCredentials) => {
+  const response = await axios.post(`${API_URL}/auth/sign-in`, credentials);
+  return response.data;
+};
+
+export const signup = async (credentials: SignupCredentials) => {
+  const response = await axios.post(`${API_URL}/auth/sign-up`, credentials);
+  const loginResponse = await login(credentials);
+  return loginResponse;
+};
+
+export const getMe = async (token: string) => {
+  axios.defaults.headers.common["Authorization"] = `Bearer ${token}`;
+  const response = await axios.get(`${API_URL}/me`);
+  return response.data;
+};
