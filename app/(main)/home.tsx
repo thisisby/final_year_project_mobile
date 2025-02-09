@@ -15,27 +15,31 @@ import {
 import ArrowLeftIcon from "../../components/ui/icons/ArrowLeftIcon";
 import SimcardIcon from "@/components/ui/icons/SimcardIcon";
 import ChartIcon from "@/components/ui/icons/ChartIcon";
-import CloudAddIcon from "@/components/ui/icons/CloudAddIcon";
+import SessionIcon from "@/components/ui/icons/TimerIcon";
 import HotYogaIcon from "@/components/ui/icons/HotYogaIcon";
-import { router } from "expo-router";
+import { Redirect, router } from "expo-router";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useUserStore } from "@/store/userStore";
+import WorkoutIcon from "@/components/ui/icons/WorkoutIcon";
+import NutritionIcon from "@/components/ui/icons/NutritionIcon";
 
 export default function Page() {
-  const clearUser = useUserStore((state) => state.clearUser);
+  const { user } = useUserStore();
 
-  const handleLogout = async () => {
-    await AsyncStorage.removeItem("jwtToken");
-    clearUser();
-  };
+  if (!user) {
+    return <Redirect href="/(auth)/login" />;
+  }
 
   return (
-    <ScrollView style={styles.container}>
+    <ScrollView
+      contentContainerStyle={{ paddingBottom: 130 }}
+      style={styles.container}
+    >
       <View style={styles.header}>
-        <Avatar title="BA" />
+        <Avatar title={user.email} />
         <View>
           <Text style={styles.headerHeading}>Good Morning!</Text>
-          <Text style={styles.headerName}>Shelley Marsh</Text>
+          <Text style={styles.headerName}>{user.email}</Text>
         </View>
       </View>
 
@@ -63,9 +67,11 @@ export default function Page() {
 
         <View style={styles.habbit}>
           <View style={styles.habbitItem}>
-            <View style={styles.card}>
+            <TouchableOpacity
+              style={[styles.card, { backgroundColor: "#f4f6f6" }]}
+            >
               <View style={{ marginBottom: 30 }}>
-                <Text>Daily Report</Text>
+                <Text style={styles.cardTitle}>Daily Report</Text>
               </View>
               <View
                 style={{
@@ -73,44 +79,52 @@ export default function Page() {
                   alignItems: "flex-end",
                 }}
               >
-                <ArrowLeftIcon />
+                <ChartIcon width={36} height={36} color="#5c9782" />
               </View>
-            </View>
-            <View style={styles.card}>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={[styles.card, { backgroundColor: "#ebf8fd" }]}
+              onPress={() => router.push("/home/workouts")}
+            >
               <View
                 style={{
-                  marginBottom: 50,
+                  marginBottom: 40,
                 }}
               >
-                <CloudAddIcon width={40} height={40} />
+                <WorkoutIcon width={60} height={60} />
               </View>
               <View>
-                <Text style={{ fontWeight: 600 }}>Workouts</Text>
+                <Text style={styles.cardTitle}>Workouts</Text>
                 <Text style={{ color: "#898989", fontSize: 12 }}>
                   22 workout guides
                 </Text>
               </View>
-            </View>
+            </TouchableOpacity>
           </View>
           <View style={styles.habbitItem}>
-            <View style={styles.card}>
+            <TouchableOpacity
+              style={[styles.card, { backgroundColor: "#fef1fa" }]}
+            >
               <View
                 style={{
-                  marginBottom: 50,
+                  marginBottom: 40,
                 }}
               >
-                <ChartIcon width={40} height={40} />
+                <SessionIcon width={60} height={60} />
               </View>
               <View>
-                <Text style={{ fontWeight: 600 }}>Workouts</Text>
+                <Text style={styles.cardTitle}>Sessions</Text>
                 <Text style={{ color: "#898989", fontSize: 12 }}>
-                  22 workout guides
+                  0 sessions today
                 </Text>
               </View>
-            </View>
-            <View style={styles.card}>
-              <View style={{ marginBottom: 30 }}>
-                <Text>Daily Report</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={[styles.card, { backgroundColor: "#e1f4e2" }]}
+            >
+              <View style={{ marginBottom: 24 }}>
+                <Text style={styles.cardTitle}>Nutrition</Text>
               </View>
               <View
                 style={{
@@ -118,15 +132,12 @@ export default function Page() {
                   alignItems: "flex-end",
                 }}
               >
-                <SimcardIcon />
+                <NutritionIcon width={40} height={40} color="#057dcd" />
               </View>
-            </View>
+            </TouchableOpacity>
           </View>
         </View>
       </View>
-      <TouchableOpacity onPress={handleLogout}>
-        <Text>Log out</Text>
-      </TouchableOpacity>
     </ScrollView>
   );
 }
@@ -148,6 +159,7 @@ const styles = StyleSheet.create({
   headerHeading: {
     fontWeight: 700,
     fontSize: 20,
+    textAlign: "right",
   },
   headerName: {
     color: "#898989",
@@ -155,7 +167,7 @@ const styles = StyleSheet.create({
   },
 
   hero: {
-    backgroundColor: "#ced4da",
+    backgroundColor: "#f4f6f6",
     paddingHorizontal: 16,
     paddingVertical: 30,
     borderRadius: 20,
@@ -165,7 +177,9 @@ const styles = StyleSheet.create({
     alignItems: "center",
     position: "relative",
   },
-
+  cardTitle: {
+    fontWeight: 700,
+  },
   habbit: {
     display: "flex",
     flexDirection: "row",

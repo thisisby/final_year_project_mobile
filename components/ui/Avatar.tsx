@@ -7,7 +7,7 @@ interface Props {
 export default function Avatar(props: Props) {
   return (
     <View style={styles.avatar}>
-      <Text>{props.title}</Text>
+      <Text>{props.title.slice(0, 2).toUpperCase()}</Text>
     </View>
   );
 }
