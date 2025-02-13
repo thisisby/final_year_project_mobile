@@ -1,7 +1,7 @@
 {
   "expo": {
     "name": "fitness-frontend",
-    "slug": "fitness-frontend",
+    "slug": "fintess",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
@@ -36,6 +36,21 @@
     ],
     "experiments": {
       "typedRoutes": true
+    },
+    "extra": {
+      "router": {
+        "origin": false
+      },
+      "eas": {
+        "projectId": "4b745298-66cf-4514-9e72-565a108e0dd2"
+      }
+    },
+    "owner": "baistan",
+    "runtimeVersion": {
+      "policy": "appVersion"
+    },
+    "updates": {
+      "url": "https://u.expo.dev/4b745298-66cf-4514-9e72-565a108e0dd2"
     }
   }
 }

@@ -69,6 +69,7 @@ export default function Page() {
           <View style={styles.habbitItem}>
             <TouchableOpacity
               style={[styles.card, { backgroundColor: "#f4f6f6" }]}
+              onPress={() => router.push("/home/daily-report")}
             >
               <View style={{ marginBottom: 30 }}>
                 <Text style={styles.cardTitle}>Daily Report</Text>

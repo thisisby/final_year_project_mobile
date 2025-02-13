@@ -39,15 +39,13 @@ export default function CustomTabBar() {
     { href: "/profile", icon: UserIcon },
   ];
 
-  const translateY = useSharedValue(100);
-  const animatedStyle = useAnimatedStyle(() => {
-    return {
-      transform: [{ translateY: translateY.value }],
-    };
-  }, []);
+  const isModal = pathname.includes("modal");
 
   return (
-    <View style={styles.container}>
+    <View
+      style={[styles.container, isModal && { opacity: 0 }]}
+      pointerEvents={isModal ? "none" : "auto"}
+    >
       <View style={styles.tabBar}>
         {isWorkoutExercisePage ? (
           <TouchableOpacity
