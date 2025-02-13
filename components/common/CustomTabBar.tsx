@@ -5,6 +5,7 @@ import {
   TouchableOpacity,
   StyleSheet,
   Dimensions,
+  Platform,
 } from "react-native";
 import { Link, usePathname } from "expo-router";
 import HomeIcon from "../ui/icons/HomeIcon";
@@ -39,7 +40,7 @@ export default function CustomTabBar() {
     { href: "/profile", icon: UserIcon },
   ];
 
-  const isModal = pathname.includes("modal");
+  const isModal = pathname.includes("modal") && Platform.OS === "android";
 
   return (
     <View

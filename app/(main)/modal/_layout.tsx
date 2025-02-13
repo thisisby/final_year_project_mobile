@@ -13,6 +13,8 @@ export default function Page() {
       <Stack.Screen name="create-new" />
       <Stack.Screen name="create-new-ai" />
       <Stack.Screen name="copy-workout/[id]" />
+      <Stack.Screen name="edit-workout/[id]" />
+      <Stack.Screen name="edit-workout-exercise/[id]" />
     </Stack>
   );
 }

@@ -6,6 +6,7 @@ import {
   StyleSheet,
   ScrollView,
   TextInput,
+  Platform,
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import CloseSquareIcon from "@/components/ui/icons/CloseSquareIcon";
@@ -155,6 +156,7 @@ export default function Page(): JSX.Element {
                 placeholderTextColor="#999999"
                 value={workoutDescription}
                 onChangeText={setWorkoutDescription}
+                multiline={true}
               />
             </View>
 
@@ -237,7 +239,7 @@ export default function Page(): JSX.Element {
             alignItems: "center",
             justifyContent: "center",
             position: "absolute",
-            bottom: 20,
+            bottom: 30,
             left: 20,
             right: 20,
             backgroundColor: "#000",

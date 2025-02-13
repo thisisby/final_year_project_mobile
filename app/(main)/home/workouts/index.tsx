@@ -17,6 +17,7 @@ import WorkoutIcon from "@/components/ui/icons/WorkoutIcon";
 import NoteIcon from "@/components/ui/icons/NoteIcon";
 import Avatar from "@/components/ui/Avatar";
 import ArrowSquareLeftIcon from "@/components/ui/icons/ArrowSquareLeftIcon";
+import SettingLinearIcon from "@/components/ui/icons/SettingLinearIcon";
 
 interface ExerciseListItem {
   id: string;
@@ -78,6 +79,7 @@ const exerciseLists: ExerciseListItem[] = [
 export default function Page(): JSX.Element {
   const navigation = useNavigation();
   const router = useRouter();
+  const [isDelete, setIsDelete] = React.useState(false);
 
   return (
     <ScrollView
@@ -88,11 +90,16 @@ export default function Page(): JSX.Element {
     >
       <View style={styles.header}>
         <TouchableOpacity onPress={() => navigation.goBack()}>
-          <ArrowSquareLeftIcon width={36} height={36} />
+          <ArrowSquareLeftIcon width={30} height={30} />
         </TouchableOpacity>
+
         <View>
           <Text style={styles.headerHeading}>Workouts</Text>
-          <Text style={styles.headerName}>22 workout items</Text>
+        </View>
+        <View>
+          <TouchableOpacity>
+            <SettingLinearIcon width={30} height={30} />
+          </TouchableOpacity>
         </View>
       </View>
       <View style={styles.habbit}>
@@ -145,17 +152,19 @@ export default function Page(): JSX.Element {
         {exerciseLists.map((item) => (
           <TouchableOpacity
             key={item.id}
-            style={styles.card3}
+            style={{}}
             onPress={() => router.push(`/home/workouts/${item.id}`)}
           >
-            <View style={styles.cardIcon2}>
-              <Ionicons name="reader-outline" size={22} color="#52b788" />
-            </View>
-            <View style={styles.cardContent}>
-              <Text style={{ fontSize: 16 }}>{item.title}</Text>
-              {item.description && (
-                <Text style={styles.cardDescription}>{item.description}</Text>
-              )}
+            <View style={styles.card3}>
+              <View style={styles.cardIcon2}>
+                <Ionicons name="reader-outline" size={22} color="#52b788" />
+              </View>
+              <View style={styles.cardContent}>
+                <Text style={{ fontSize: 16 }}>{item.title}</Text>
+                {item.description && (
+                  <Text style={styles.cardDescription}>{item.description}</Text>
+                )}
+              </View>
             </View>
           </TouchableOpacity>
         ))}
@@ -292,11 +301,11 @@ const styles = StyleSheet.create({
   headerHeading: {
     fontWeight: 700,
     fontSize: 16,
-    textAlign: "right",
+    textAlign: "center",
   },
   headerName: {
     color: "#898989",
-    textAlign: "right",
+    textAlign: "center",
     fontSize: 12,
   },
 });

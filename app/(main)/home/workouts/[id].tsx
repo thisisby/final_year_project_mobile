@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import {
   View,
   Text,
@@ -7,6 +7,11 @@ import {
   StyleSheet,
   ScrollView,
   TextInput,
+  TouchableWithoutFeedback,
+  Animated,
+  Modal,
+  KeyboardAvoidingView,
+  Platform,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -18,6 +23,15 @@ import WorkoutIcon from "@/components/ui/icons/WorkoutIcon";
 import NoteIcon from "@/components/ui/icons/NoteIcon";
 import Avatar from "@/components/ui/Avatar";
 import ArrowSquareLeftIcon from "@/components/ui/icons/ArrowSquareLeftIcon";
+import SettingLinearIcon from "@/components/ui/icons/SettingLinearIcon";
+import {
+  FadeInDown,
+  FadeInUp,
+  FadeOutDown,
+  FadeOutUp,
+} from "react-native-reanimated";
+import TrashLinearIcon from "@/components/ui/icons/TrashLinearIcon";
+import CloseSquareIcon from "@/components/ui/icons/CloseSquareIcon";
 
 interface ExerciseListItem {
   id: string;
@@ -80,6 +94,15 @@ export default function Page(): JSX.Element {
   const router = useRouter();
   const { id } = useLocalSearchParams();
 
+  const [isDropdownVisible, setIsDropdownVisible] = useState(false); // State to track dropdown visibility
+
+  const toggleDropdown = () => {
+    setIsDropdownVisible(!isDropdownVisible);
+  };
+
+  const handleClose = () => {
+    setIsDropdownVisible(false);
+  };
   const [isExpanded, setIsExpanded] = useState(false); // State to track expanded state
 
   const toggleExpand = () => {
@@ -96,13 +119,92 @@ export default function Page(): JSX.Element {
     >
       <View style={styles.header}>
         <TouchableOpacity onPress={() => navigation.goBack()}>
-          <ArrowSquareLeftIcon width={36} height={36} />
+          <ArrowSquareLeftIcon width={30} height={30} />
         </TouchableOpacity>
         <View>
-          <Text style={styles.headerHeading}>Wednesday Full body workout</Text>
-          <Text style={styles.headerName}>22 total lifts asada sa...</Text>
+          <Text style={styles.headerHeading}>Monday: Full-Body Workout</Text>
+        </View>
+        <View>
+          <TouchableOpacity onPress={toggleDropdown}>
+            {isDropdownVisible ? (
+              <CloseSquareIcon width={30} height={30} />
+            ) : (
+              <SettingLinearIcon width={30} height={30} />
+            )}
+          </TouchableOpacity>
         </View>
       </View>
+      {isDropdownVisible && (
+        <View
+          style={{
+            flex: 1,
+            position: "absolute",
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            zIndex: 999,
+          }}
+        >
+          <TouchableWithoutFeedback onPress={handleClose}>
+            <View
+              style={{
+                flex: 1,
+                position: "relative",
+              }}
+            >
+              <View style={[styles.dropdown]}>
+                <TouchableOpacity
+                  style={[
+                    styles.dropdownItem,
+                    {
+                      borderTopLeftRadius: 10,
+                      borderTopRightRadius: 10,
+                      borderBottomWidth: 1,
+                    },
+                  ]}
+                  onPress={() => {
+                    setIsDropdownVisible(false);
+                    router.push(`/modal/edit-workout/${id}`);
+                  }}
+                >
+                  <View
+                    style={[styles.cardIcon2, { backgroundColor: "#1f1f1f" }]}
+                  >
+                    <Ionicons name="reader-outline" size={22} color="#fff" />
+                  </View>
+                  <View style={styles.cardContent}>
+                    <Text style={[styles.cardTitle, { color: "#fff" }]}>
+                      Edit
+                    </Text>
+                  </View>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={[
+                    styles.dropdownItem,
+                    {
+                      borderBottomLeftRadius: 10,
+                      borderBottomRightRadius: 10,
+                    },
+                  ]}
+                >
+                  <View
+                    style={[styles.cardIcon2, { backgroundColor: "#1f1f1f" }]}
+                  >
+                    <TrashLinearIcon color="#fff" width={24} height={24} />
+                  </View>
+                  <View style={styles.cardContent}>
+                    <Text style={[styles.cardTitle, { color: "#fff" }]}>
+                      Delete
+                    </Text>
+                  </View>
+                </TouchableOpacity>
+              </View>
+            </View>
+          </TouchableWithoutFeedback>
+        </View>
+      )}
+
       <View
         style={{
           marginBottom: 20,
@@ -152,16 +254,38 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     flex: 1,
   },
-
+  overlay: {
+    position: "absolute",
+    top: 40, // Adjust based on header height
+    right: 0,
+    left: 0,
+    bottom: 0,
+    zIndex: 999,
+  },
+  dropdown: {
+    position: "absolute",
+    right: 0,
+    top: 70,
+    width: "50%",
+    backgroundColor: "#1f1f1f",
+    borderRadius: 10,
+    zIndex: 999,
+  },
+  dropdownItem: {
+    flexDirection: "row",
+    alignItems: "center",
+    padding: 8,
+    backgroundColor: "#1f1f1f",
+  },
   // Sticky Header
   header: {
-    height: 60,
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
     backgroundColor: "white",
     marginBottom: 20,
-    marginTop: 10,
+    marginTop: 20,
+    position: "relative",
   },
   headerTitle: { fontSize: 18, fontWeight: "bold" },
 
@@ -275,11 +399,11 @@ const styles = StyleSheet.create({
   headerHeading: {
     fontWeight: 700,
     fontSize: 16,
-    textAlign: "right",
+    textAlign: "center",
   },
   headerName: {
     color: "#898989",
-    textAlign: "right",
+    textAlign: "center",
     fontSize: 12,
   },
 });
