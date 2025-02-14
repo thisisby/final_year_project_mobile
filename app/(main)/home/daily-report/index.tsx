@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import {
   View,
   Text,
@@ -13,7 +13,15 @@ import ArrowSquareLeftIcon from "@/components/ui/icons/ArrowSquareLeftIcon";
 import { LinearGradient } from "expo-linear-gradient";
 import ChartIcon from "@/components/ui/icons/ChartIcon";
 import Heading from "@/components/ui/Heading";
-import { LineChart } from "react-native-gifted-charts";
+import { Calendar } from "react-native-calendars";
+import CalendarLinearIcon from "@/components/ui/icons/CalendarLinearIcon";
+import { router } from "expo-router";
+import SmsIcon from "@/components/ui/icons/SmsIcon";
+import NoteIcon from "@/components/ui/icons/NoteIcon";
+import TimerIcon from "@/components/ui/icons/TimerIcon";
+import AddIcon from "@/components/ui/icons/AddIcon";
+import AddSquareLinearIcon from "@/components/ui/icons/AddSquareLinearIcon";
+import TimerLinearIcon from "@/components/ui/icons/TimerLinearIcon";
 
 function createDatesArray(year: number, month: number): Date[] {
   const datesArray: Date[] = [];
@@ -61,6 +69,10 @@ export default function Page(): JSX.Element {
       });
     }
   };
+
+  const [selectedDateCalendar, setSelectedDateCalendar] = useState(
+    new Date().toISOString().split("T")[0]
+  );
 
   React.useLayoutEffect(() => {
     // Add a small delay to ensure the layout is fully calculated
@@ -127,6 +139,11 @@ export default function Page(): JSX.Element {
             {currentDate.toLocaleString("default", { month: "long" })}{" "}
             {currentDate.getFullYear()}
           </Text>
+        </View>
+        <View>
+          <TouchableOpacity onPress={() => router.push(`/modal/calendar-list`)}>
+            <CalendarLinearIcon />
+          </TouchableOpacity>
         </View>
       </View>
       <View style={styles.scrollViewWrapper}>
@@ -225,7 +242,7 @@ export default function Page(): JSX.Element {
           justifyContent: "space-between",
           flexWrap: "wrap",
           gap: 10,
-          marginBottom: 20,
+          marginBottom: 30,
         }}
       >
         <View
@@ -320,6 +337,148 @@ export default function Page(): JSX.Element {
           <Text style={{ fontSize: 18, fontWeight: "500" }}>40</Text>
         </View>
       </View>
+
+      <View
+        style={{
+          paddingHorizontal: 20,
+
+          marginBottom: 30,
+        }}
+      >
+        <Heading level={2} style={{ marginBottom: 14, fontSize: 16 }}>
+          Exercises
+        </Heading>
+
+        <View
+          style={{
+            display: "flex",
+            flexDirection: "row",
+            gap: 6,
+            flexWrap: "wrap",
+          }}
+        >
+          <View style={styles.card3}>
+            <Text style={styles.cardTitle}>Squat</Text>
+          </View>
+          <View style={styles.card3}>
+            <Text style={styles.cardTitle}>Dumbell Press</Text>
+          </View>
+          <View style={styles.card3}>
+            <Text style={styles.cardTitle}>Bench Press</Text>
+          </View>
+          <View style={styles.card3}>
+            <Text style={styles.cardTitle}>Calf Rises</Text>
+          </View>
+          <View style={styles.card3}>
+            <Text style={styles.cardTitle}>Dips</Text>
+          </View>
+        </View>
+      </View>
+
+      <View
+        style={{
+          paddingHorizontal: 20,
+        }}
+      >
+        <Heading level={2} style={{ marginBottom: 14, fontSize: 16 }}>
+          Sessions
+        </Heading>
+
+        <View>
+          <View
+            style={{
+              paddingVertical: 8,
+              paddingHorizontal: 10,
+              borderRadius: 8,
+              borderWidth: 1,
+              borderColor: "#efefef",
+              display: "flex",
+              flexDirection: "row",
+              gap: 10,
+              alignItems: "center",
+              marginBottom: 8,
+            }}
+          >
+            <View
+              style={{
+                padding: 4,
+                borderRadius: 6,
+                backgroundColor: "#f1f1f1",
+              }}
+            >
+              <TimerLinearIcon width={24} height={24} />
+            </View>
+            <View>
+              <Text style={styles.cardTitle}>Strength Training</Text>
+              <Text style={{ fontSize: 12, color: "#666", marginTop: 2 }}>
+                10 mins
+              </Text>
+            </View>
+          </View>
+
+          <View
+            style={{
+              paddingVertical: 8,
+              paddingHorizontal: 10,
+              borderRadius: 8,
+              borderWidth: 1,
+              borderColor: "#efefef",
+              display: "flex",
+              flexDirection: "row",
+              gap: 10,
+              alignItems: "center",
+              marginBottom: 8,
+            }}
+          >
+            <View
+              style={{
+                padding: 4,
+                borderRadius: 6,
+                backgroundColor: "#f1f1f1",
+              }}
+            >
+              <TimerLinearIcon width={24} height={24} />
+            </View>
+            <View>
+              <Text style={styles.cardTitle}>Strength Training</Text>
+              <Text style={{ fontSize: 12, color: "#666", marginTop: 2 }}>
+                10 mins
+              </Text>
+            </View>
+          </View>
+
+          <View
+            style={{
+              paddingVertical: 8,
+              paddingHorizontal: 10,
+              borderRadius: 8,
+              borderWidth: 1,
+              borderColor: "#efefef",
+              display: "flex",
+              flexDirection: "row",
+              gap: 10,
+              alignItems: "center",
+              marginBottom: 8,
+            }}
+          >
+            <View
+              style={{
+                padding: 4,
+                borderRadius: 6,
+                backgroundColor: "#f1f1f1",
+              }}
+            >
+              <TimerLinearIcon width={24} height={24} />
+            </View>
+            <View>
+              <Text style={styles.cardTitle}>Strength Training</Text>
+              <Text style={{ fontSize: 12, color: "#666", marginTop: 2 }}>
+                10 mins
+              </Text>
+            </View>
+          </View>
+        </View>
+      </View>
     </ScrollView>
   );
 }
@@ -341,11 +500,22 @@ const styles = StyleSheet.create({
   headerHeading: {
     fontWeight: "700",
     fontSize: 16,
-    textAlign: "right",
+    textAlign: "center",
   },
+  card3: {
+    paddingVertical: 4,
+    paddingHorizontal: 10,
+    borderRadius: 8,
+    justifyContent: "center",
+    alignItems: "center",
+    borderWidth: 1,
+    borderColor: "#efefef",
+  },
+  cardContent: {},
+  cardTitle: { fontSize: 14, fontWeight: "bold" },
   headerName: {
     color: "#898989",
-    textAlign: "right",
+    textAlign: "center",
     fontSize: 12,
   },
   datesContainer: {
@@ -356,17 +526,20 @@ const styles = StyleSheet.create({
     position: "relative",
   },
   dateItem: {
-    width: 50, // Fixed width for each date item
+    width: 51,
     padding: 10,
     alignItems: "center",
     borderRadius: 10,
     display: "flex",
     justifyContent: "center",
     textAlign: "center",
-    backgroundColor: "#f1f1f1",
+    borderWidth: 1,
+    borderColor: "#efefef",
   },
   selectedDateItem: {
     backgroundColor: "#1f1f1f",
+    borderWidth: 1,
+    borderColor: "#1f1f1f",
   },
 
   leftOverlay: {
@@ -386,5 +559,17 @@ const styles = StyleSheet.create({
   scrollViewWrapper: {
     position: "relative",
     marginBottom: 40,
+  },
+  calendar: {
+    borderWidth: 1,
+    borderColor: "#e5e7eb",
+    borderRadius: 8,
+    overflow: "hidden",
+    width: "100%",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.05,
+    shadowRadius: 3,
+    elevation: 2,
   },
 });

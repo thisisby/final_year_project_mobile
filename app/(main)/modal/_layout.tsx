@@ -15,6 +15,7 @@ export default function Page() {
       <Stack.Screen name="copy-workout/[id]" />
       <Stack.Screen name="edit-workout/[id]" />
       <Stack.Screen name="edit-workout-exercise/[id]" />
+      <Stack.Screen name="calendar-list" />
     </Stack>
   );
 }
