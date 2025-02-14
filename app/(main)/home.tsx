@@ -106,6 +106,7 @@ export default function Page() {
           <View style={styles.habbitItem}>
             <TouchableOpacity
               style={[styles.card, { backgroundColor: "#fef1fa" }]}
+              onPress={() => router.push("/home/sessions")}
             >
               <View
                 style={{
