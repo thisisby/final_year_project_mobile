@@ -156,7 +156,10 @@ export default function Page(): JSX.Element {
         >
           <TouchableOpacity
             onPress={handlePrevMonth}
-            style={[styles.dateItem, { backgroundColor: "#1f1f1f" }]}
+            style={[
+              styles.dateItem,
+              { backgroundColor: "#1f1f1f", borderColor: "#1f1f1f" },
+            ]}
           >
             <View style={{ alignItems: "center" }}>
               <Text style={{ fontWeight: 600, color: "#fff" }}>
@@ -203,7 +206,10 @@ export default function Page(): JSX.Element {
           ))}
           <TouchableOpacity
             onPress={handleNextMonth}
-            style={[styles.dateItem, { backgroundColor: "#1f1f1f" }]}
+            style={[
+              styles.dateItem,
+              { backgroundColor: "#1f1f1f", borderColor: "#1f1f1f" },
+            ]}
           >
             <View style={{ alignItems: "center" }}>
               <Text style={{ fontWeight: 600, color: "#fff" }}>

@@ -23,6 +23,8 @@ import Animated, {
   FadeInDown,
   FadeOutUp,
 } from "react-native-reanimated";
+import ArrangeSquareLinearIcon from "../ui/icons/ArrangeSquareLinearIcon";
+import AddSquareLinearIcon from "../ui/icons/AddSquareLinearIcon";
 
 const { width } = Dimensions.get("window");
 
@@ -33,6 +35,9 @@ export default function CustomTabBar() {
   // Check if the current route matches `/home/workout-exercises/{slug}`
   const isWorkoutExercisePage = pathname.startsWith("/home/workout-exercises/");
 
+  // Check if the current route matches `/home/sessions/{slug}`
+  const isSessionPage = pathname.startsWith("/home/sessions/");
+
   const tabs = [
     { href: "/home", icon: HomeIcon },
     { href: "/explore", icon: NoteIcon },
@@ -42,52 +47,80 @@ export default function CustomTabBar() {
 
   const isModal = pathname.includes("modal") && Platform.OS === "android";
 
+  const render = () => {
+    if (isWorkoutExercisePage) {
+      return (
+        <TouchableOpacity
+          style={{
+            flex: 1,
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+          }}
+          onPress={() => console.log("Add Button Pressed")}
+        >
+          <Animated.View
+            style={{
+              flexDirection: "row",
+              alignItems: "center",
+            }}
+            entering={FadeInDown}
+            exiting={FadeOutDown}
+          >
+            <AddSquareLinearIcon color={"#FFFFFF"} />
+            <Text style={{ color: "#FFFFFF", marginLeft: 10 }}>
+              ADD NEW RECORD
+            </Text>
+          </Animated.View>
+        </TouchableOpacity>
+      );
+    } else if (isSessionPage) {
+      return (
+        <TouchableOpacity
+          style={{
+            flex: 1,
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+          }}
+          onPress={() => console.log("Update Pressed")}
+        >
+          <Animated.View
+            style={{
+              flexDirection: "row",
+              alignItems: "center",
+            }}
+            entering={FadeInDown}
+            exiting={FadeOutDown}
+          >
+            <ArrangeSquareLinearIcon color={"#FFFFFF"} />
+            <Text style={{ color: "#FFFFFF", marginLeft: 10 }}>
+              UPDATE SESSION
+            </Text>
+          </Animated.View>
+        </TouchableOpacity>
+      );
+    } else {
+      return tabs.map(({ href, icon: Icon }, index) => {
+        const isActive = pathname.split("/").includes(href.split("/")[1]);
+        return (
+          <Link href={href} asChild key={index}>
+            <TouchableOpacity disabled={isDisabled && isActive}>
+              <Animated.View entering={FadeInUp} exiting={FadeOutUp}>
+                <Icon color={isActive ? "#FFFFFF" : "#8b8d92"} />
+              </Animated.View>
+            </TouchableOpacity>
+          </Link>
+        );
+      });
+    }
+  };
   return (
     <View
       style={[styles.container, isModal && { opacity: 0 }]}
       pointerEvents={isModal ? "none" : "auto"}
     >
-      <View style={styles.tabBar}>
-        {isWorkoutExercisePage ? (
-          <TouchableOpacity
-            style={{
-              flex: 1,
-              display: "flex",
-              justifyContent: "center",
-              alignItems: "center",
-            }}
-            onPress={() => console.log("Add Button Pressed")}
-          >
-            <Animated.View
-              style={{
-                flexDirection: "row",
-                alignItems: "center",
-              }}
-              entering={FadeInDown}
-              exiting={FadeOutDown}
-            >
-              <AddIcon color={"#FFFFFF"} />
-              <Text style={{ color: "#FFFFFF", marginLeft: 10 }}>
-                ADD NEW RECORD
-              </Text>
-            </Animated.View>
-          </TouchableOpacity>
-        ) : (
-          // Render the regular tab bar routes
-          tabs.map(({ href, icon: Icon }, index) => {
-            const isActive = pathname.split("/").includes(href.split("/")[1]);
-            return (
-              <Link href={href} asChild key={index}>
-                <TouchableOpacity disabled={isDisabled && isActive}>
-                  <Animated.View entering={FadeInUp} exiting={FadeOutUp}>
-                    <Icon color={isActive ? "#FFFFFF" : "#8b8d92"} />
-                  </Animated.View>
-                </TouchableOpacity>
-              </Link>
-            );
-          })
-        )}
-      </View>
+      <View style={styles.tabBar}>{render()}</View>
     </View>
   );
 }

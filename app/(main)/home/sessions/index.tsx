@@ -22,12 +22,12 @@ import TimerLinearIcon from "@/components/ui/icons/TimerLinearIcon";
 
 const categories = [
   "All",
-  "Full Body",
-  "Upper Body",
-  "Lower Body",
-  "Lats",
-  "Core",
-  "Legs",
+  "Strength Training",
+  "Cardio",
+  "Yoga",
+  "Pilates",
+  "Stretching",
+  "Meditation",
 ];
 
 interface Session {
@@ -131,7 +131,7 @@ export default function Page(): JSX.Element {
               fontSize: 14,
               fontWeight: "bold",
               marginVertical: 10,
-              color: "#333",
+              color: "#1f1f1f",
             }}
           >
             {date}
@@ -151,6 +151,7 @@ export default function Page(): JSX.Element {
                 alignItems: "center",
                 marginBottom: 8,
               }}
+              onPress={() => router.push(`/home/sessions/${session.id}`)}
             >
               <View
                 style={{
