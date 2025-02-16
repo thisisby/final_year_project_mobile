@@ -18,6 +18,8 @@ import NoteIcon from "@/components/ui/icons/NoteIcon";
 import Avatar from "@/components/ui/Avatar";
 import ArrowSquareLeftIcon from "@/components/ui/icons/ArrowSquareLeftIcon";
 import SettingLinearIcon from "@/components/ui/icons/SettingLinearIcon";
+import TimerLinearIcon from "@/components/ui/icons/TimerLinearIcon";
+import NoteLinearIcon from "@/components/ui/icons/NoteLinearIcon";
 
 interface ExerciseListItem {
   id: string;
@@ -40,7 +42,7 @@ const exerciseLists: ExerciseListItem[] = [
     id: "22",
     title: "Starting Strength: Workout B",
     count: 3,
-    description: "Follow the same progression scheme as Workout A",
+    description: "Follow the same progression scheme as Workout A s asd  asdd",
   },
 
   {
@@ -152,19 +154,42 @@ export default function Page(): JSX.Element {
         {exerciseLists.map((item) => (
           <TouchableOpacity
             key={item.id}
-            style={{}}
+            style={{
+              paddingVertical: 8,
+              paddingHorizontal: 10,
+              borderRadius: 8,
+              borderWidth: 1,
+              borderColor: "#efefef",
+              display: "flex",
+              flexDirection: "row",
+              gap: 10,
+              alignItems: "center",
+              marginBottom: 6,
+            }}
             onPress={() => router.push(`/home/workouts/${item.id}`)}
           >
-            <View style={styles.card3}>
-              <View style={styles.cardIcon2}>
-                <Ionicons name="reader-outline" size={22} color="#52b788" />
-              </View>
-              <View style={styles.cardContent}>
-                <Text style={{ fontSize: 16 }}>{item.title}</Text>
-                {item.description && (
-                  <Text style={styles.cardDescription}>{item.description}</Text>
-                )}
-              </View>
+            <View
+              style={{
+                padding: 4,
+                borderRadius: 6,
+                backgroundColor: "#f1f1f1",
+              }}
+            >
+              <NoteLinearIcon width={24} height={24} />
+            </View>
+            <View style={{ flex: 1 }}>
+              <Text style={{ fontSize: 14, fontWeight: "bold" }}>
+                {item.title}
+              </Text>
+              {item.description && (
+                <Text
+                  style={{ fontSize: 12, color: "#666", marginTop: 2 }}
+                  numberOfLines={1}
+                  ellipsizeMode="tail"
+                >
+                  {item.description}
+                </Text>
+              )}
             </View>
           </TouchableOpacity>
         ))}
