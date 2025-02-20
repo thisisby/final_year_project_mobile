@@ -191,6 +191,7 @@ export default function Page(): JSX.Element {
             borderTopLeftRadius: 10,
             borderTopRightRadius: 10,
           }}
+          onPress={() => router.push(`/home/analytics/${id}`)}
         >
           <View style={styles.cardIcon2}>
             <Ionicons name="reader-outline" size={22} color="#52b788" />

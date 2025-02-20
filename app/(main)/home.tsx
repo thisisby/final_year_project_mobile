@@ -124,6 +124,7 @@ export default function Page() {
             </TouchableOpacity>
             <TouchableOpacity
               style={[styles.card, { backgroundColor: "#e1f4e2" }]}
+              onPress={() => router.push("/home/nutritions")}
             >
               <View style={{ marginBottom: 24 }}>
                 <Text style={styles.cardTitle}>Nutrition</Text>

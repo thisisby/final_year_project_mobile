@@ -21,6 +21,8 @@ export default function ProtectedLayout() {
       }}
     >
       <Stack.Screen name="home/workouts/index" />
+      <Stack.Screen name="home/nutritions/index" />
+      <Stack.Screen name="home/analytics" />
       <Stack.Screen name="explore/index" />
       <Stack.Screen name="profile/index" />
       <Stack.Screen name="samba/index" />

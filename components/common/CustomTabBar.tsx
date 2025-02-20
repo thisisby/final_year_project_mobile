@@ -37,6 +37,10 @@ export default function CustomTabBar() {
 
   // Check if the current route matches `/home/sessions/{slug}`
   const isSessionPage = pathname.startsWith("/home/sessions/");
+  const isSessionPageAdd = pathname.startsWith("/home/sessions");
+
+  const isNutritionPage = pathname.startsWith("/home/nutritions/");
+  const isNutritionPageAdd = pathname.startsWith("/home/nutritions");
 
   const tabs = [
     { href: "/home", icon: HomeIcon },
@@ -96,6 +100,84 @@ export default function CustomTabBar() {
             <ArrangeSquareLinearIcon color={"#FFFFFF"} />
             <Text style={{ color: "#FFFFFF", marginLeft: 10 }}>
               UPDATE SESSION
+            </Text>
+          </Animated.View>
+        </TouchableOpacity>
+      );
+    } else if (isSessionPageAdd && pathname.split("/").length === 3) {
+      return (
+        <TouchableOpacity
+          style={{
+            flex: 1,
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+          }}
+          onPress={() => console.log("Update Pressed")}
+        >
+          <Animated.View
+            style={{
+              flexDirection: "row",
+              alignItems: "center",
+            }}
+            entering={FadeInDown}
+            exiting={FadeOutDown}
+          >
+            <AddSquareLinearIcon color={"#FFFFFF"} />
+            <Text style={{ color: "#FFFFFF", marginLeft: 10 }}>
+              ADD NEW RECORD
+            </Text>
+          </Animated.View>
+        </TouchableOpacity>
+      );
+    } else if (isNutritionPageAdd && pathname.split("/").length === 3) {
+      return (
+        <TouchableOpacity
+          style={{
+            flex: 1,
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+          }}
+          onPress={() => console.log("Update Pressed")}
+        >
+          <Animated.View
+            style={{
+              flexDirection: "row",
+              alignItems: "center",
+            }}
+            entering={FadeInDown}
+            exiting={FadeOutDown}
+          >
+            <AddSquareLinearIcon color={"#FFFFFF"} />
+            <Text style={{ color: "#FFFFFF", marginLeft: 10 }}>
+              ADD NEW RECORD
+            </Text>
+          </Animated.View>
+        </TouchableOpacity>
+      );
+    } else if (isNutritionPage) {
+      return (
+        <TouchableOpacity
+          style={{
+            flex: 1,
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+          }}
+          onPress={() => console.log("Update Pressed Nutrition")}
+        >
+          <Animated.View
+            style={{
+              flexDirection: "row",
+              alignItems: "center",
+            }}
+            entering={FadeInDown}
+            exiting={FadeOutDown}
+          >
+            <ArrangeSquareLinearIcon color={"#FFFFFF"} />
+            <Text style={{ color: "#FFFFFF", marginLeft: 10 }}>
+              UPDATE NUTRITION
             </Text>
           </Animated.View>
         </TouchableOpacity>
