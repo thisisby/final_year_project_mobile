@@ -28,7 +28,7 @@ export function useCreateWorkout() {
   });
 
   return {
-    createWorkout: mutation.mutate,
+    createWorkout: mutation.mutateAsync,
     isLoading: mutation.isLoading,
   };
 }
