@@ -72,6 +72,14 @@ export default function Page(): JSX.Element {
   const handleAddCustomExercise = async () => {
     if (search.trim() === "") return;
 
+    const existingExercise = exerciseLists.find(
+      (exercise) => exercise.name.toLowerCase() === search.toLowerCase()
+    );
+
+    if (existingExercise) {
+      return;
+    }
+
     try {
       const newExercise = await createCustomExercise({ name: search });
       console.log("Created exercise:ssss", newExercise); // Now this should definitely log the data
@@ -90,14 +98,12 @@ export default function Page(): JSX.Element {
 
   useEffect(() => {
     const combinedExercises = [
-      ...(myExercisesData?.payload || []), // myExercisesData comes first
+      ...(myExercisesData?.payload || []),
       ...(exercisesData?.payload || []),
     ];
 
     const uniqueExercises = Array.from(
-      new Map(
-        combinedExercises.map((item) => [item.id, item]) // Using 'id' for uniqueness if that's more stable
-      ).values()
+      new Map(combinedExercises.map((item) => [item.id, item])).values()
     );
 
     setExerciseLists(uniqueExercises);
