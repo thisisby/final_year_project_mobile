@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   View,
   Text,
@@ -8,6 +8,8 @@ import {
   TextInput,
   Platform,
   KeyboardAvoidingView,
+  Dimensions,
+  ActivityIndicator,
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import CloseSquareIcon from "@/components/ui/icons/CloseSquareIcon";
@@ -17,45 +19,33 @@ import TickSquareBoldIcon from "@/components/ui/icons/TickSquareBoldIcon";
 import ArrowSquareLeftIcon from "@/components/ui/icons/ArrowSquareLeftIcon";
 import AddIcon from "@/components/ui/icons/AddIcon";
 import AddSquareLinearIcon from "@/components/ui/icons/AddSquareLinearIcon";
+import { useCreateWorkout, useWorkouts } from "@/hooks/useWorkouts";
+import {
+  useCreateCustomExercise,
+  useExercises,
+  useMyExercises,
+} from "@/hooks/useExercise";
+import { CreateCustomExercise } from "@/services/exercisesService";
+import { CreateWorkoutRequest } from "@/services/workoutsService";
+
+const windowHeight = Dimensions.get("window").height;
 
 export default function Page(): JSX.Element {
   const navigation = useNavigation();
   const [search, setSearch] = useState("");
   const [newExercise, setNewExercise] = useState(false);
-  const [selectedExercises, setSelectedExercises] = useState<string[]>([]);
+  const [selectedExercises, setSelectedExercises] = useState<number[]>([]);
   const [stage, setStage] = useState(1); // 1: Initial stage, 2: Search and exercise selection
   const [workoutName, setWorkoutName] = useState("");
   const [workoutDescription, setWorkoutDescription] = useState("");
-  const [exerciseLists, setExerciseLists] = useState<ExerciseListItem[]>([
-    { id: "1", title: "My Exercises", count: 29 },
-    { id: "2", title: "Wednesday: Full-Body Workout", count: 7 },
-    { id: "3", title: "Squat", count: 3 },
-    { id: "4", title: "Arnold’s Golden Six", count: 6 },
-    { id: "5", title: "Friday: Full-Body Workout", count: 7 },
-    { id: "6", title: "Bench Press", count: 7 },
-    { id: "7", title: "Monday: Full-Body Workout", count: 7 },
-    { id: "8", title: "Monday: Full-Body Workout", count: 7 },
-    { id: "10", title: "Monday: Full-Body Workout", count: 7 },
-    { id: "91", title: "Monday: Full-Body Workout", count: 7 },
-    { id: "92", title: "Monday: Full-Body Workout", count: 7 },
-    { id: "93", title: "Monday: Full-Body Workout", count: 7 },
-    { id: "49", title: "Monday: Full-Body Workout", count: 7 },
-    { id: "95", title: "Monday: Full-Body Workout", count: 7 },
-    { id: "96", title: "Monday: Full-Body Workout", count: 7 },
-    { id: "933", title: "Monday: Full-Body Workout", count: 7 },
-    { id: "921", title: "Monday: Full-Body Workout", count: 7 },
-    { id: "911", title: "Monday: Full-Body Workout", count: 7 },
-  ]);
+  const [exerciseLists, setExerciseLists] = useState<ExerciseListItem[]>([]);
+
+  const { createWorkout, isLoading: isCreateLoading } = useCreateWorkout();
 
   interface ExerciseListItem {
-    id: string;
-    title: string;
-    count: number;
+    id: number;
+    name: string;
   }
-
-  const filteredExercises = exerciseLists.filter((item) =>
-    item.title.toLowerCase().includes(search.toLowerCase())
-  );
 
   const handleContinue = () => {
     if (workoutName) {
@@ -63,40 +53,61 @@ export default function Page(): JSX.Element {
     }
   };
 
-  const handleSaveWorkout = () => {
-    // Handle saving the workout with selected exercises
-    console.log("Workout Name:", workoutName);
-    console.log("Workout Description:", workoutDescription);
-    console.log("Selected Exercises:", selectedExercises);
-  };
+  const handleSaveWorkout = async () => {
+    const newWorkout: CreateWorkoutRequest = {
+      title: workoutName,
+      description: workoutDescription,
+      workoutExercises: selectedExercises,
+    };
 
-  const handleAddCustomExercise = () => {
-    if (search.trim() === "") return; // Don't add empty exercises
-
-    // Generate a unique ID for the new exercise
-    const newExerciseId = String(Math.random().toString(36).substr(2, 9));
-
-    const count = exerciseLists.filter(
-      (item) => item.title.toLowerCase() === search.toLowerCase()
-    ).length;
-    if (count > 0) {
+    if (selectedExercises.length === 0) {
       return;
     }
 
-    // Create the new exercise object
-    const newExerciseItem: ExerciseListItem = {
-      id: newExerciseId,
-      title: search,
-      count: 0, // You can set this to 0 or any default value
-    };
+    await createWorkout(newWorkout);
 
-    // Add the new exercise to the list
-    setExerciseLists([newExerciseItem, ...exerciseLists]);
+    navigation.goBack();
+  };
+  const createCustomExercise = useCreateCustomExercise();
+  const handleAddCustomExercise = async () => {
+    if (search.trim() === "") return;
 
-    // Add the new exercise to the selected exercises
-    setSelectedExercises([...selectedExercises, newExerciseId]);
+    try {
+      const newExercise = await createCustomExercise({ name: search });
+      console.log("Created exercise:ssss", newExercise); // Now this should definitely log the data
+
+      setSelectedExercises([newExercise.payload.id, ...selectedExercises]);
+    } catch (error) {
+      console.error("Failed to create exercise:", error);
+    }
   };
 
+  const [keyboardStatus, setKeyboardStatus] = useState(false);
+
+  const { isLoading: isExercisesLoading, data: exercisesData } = useExercises();
+  const { isLoading: isMyExercisesLoading, data: myExercisesData } =
+    useMyExercises();
+
+  useEffect(() => {
+    const combinedExercises = [
+      ...(myExercisesData?.payload || []), // myExercisesData comes first
+      ...(exercisesData?.payload || []),
+    ];
+
+    const uniqueExercises = Array.from(
+      new Map(
+        combinedExercises.map((item) => [item.id, item]) // Using 'id' for uniqueness if that's more stable
+      ).values()
+    );
+
+    setExerciseLists(uniqueExercises);
+  }, [exercisesData, myExercisesData]);
+
+  console.log("selected", selectedExercises);
+
+  const filteredExercises = exerciseLists.filter((item) =>
+    item.name.toLowerCase().includes(search.toLowerCase())
+  );
   return (
     <View style={styles.container}>
       <ScrollView
@@ -177,6 +188,8 @@ export default function Page(): JSX.Element {
               placeholderTextColor="#999999"
               value={search}
               onChangeText={setSearch}
+              onFocus={() => setKeyboardStatus(true)}
+              onBlur={() => setKeyboardStatus(false)}
             />
 
             <View>
@@ -191,7 +204,7 @@ export default function Page(): JSX.Element {
               </Text>
 
               <View style={styles.sectionCard}>
-                {filteredExercises.map((item) => (
+                {filteredExercises.reverse().map((item) => (
                   <TouchableOpacity
                     key={item.id}
                     style={styles.card3}
@@ -211,7 +224,7 @@ export default function Page(): JSX.Element {
                       ) : (
                         <TickSquareIcon width={24} height={24} />
                       )}
-                      <Text style={styles.cardTitle}>{item.title}</Text>
+                      <Text style={styles.cardTitle}>{item.name}</Text>
                     </View>
                   </TouchableOpacity>
                 ))}
@@ -235,23 +248,34 @@ export default function Page(): JSX.Element {
       {/* Bottom Button */}
       {stage === 2 && (
         <TouchableOpacity
-          style={{
-            flexDirection: "row",
-            alignItems: "center",
-            justifyContent: "center",
-            position: "absolute",
-            bottom: 30,
-            left: 20,
-            right: 20,
-            backgroundColor: "#000",
-            padding: 14,
-            borderRadius: 20,
-            paddingVertical: 16,
-            paddingHorizontal: 20,
-          }}
+          style={[
+            {
+              flexDirection: "row",
+              alignItems: "center",
+              justifyContent: "center",
+              position: "absolute",
+              bottom: 20,
+              left: 20,
+              right: 20,
+              backgroundColor: "#000",
+              padding: 14,
+              borderRadius: 20,
+              paddingVertical: 16,
+              paddingHorizontal: 20,
+            },
+          ]}
           onPress={handleSaveWorkout}
         >
-          <AddIcon width={26} height={26} color={"#FFFFFF"} />
+          {isCreateLoading ? (
+            <ActivityIndicator
+              size={26}
+              color="#FFFFFF"
+              style={{ marginLeft: 10 }}
+            />
+          ) : (
+            <AddIcon width={26} height={26} color={"#FFFFFF"} />
+          )}
+
           <Text style={{ color: "#FFFFFF", marginLeft: 10 }}>
             CRETAE NEW WORKOUT
           </Text>

@@ -7,7 +7,7 @@ import { useUserStore } from "@/store/userStore";
 import Toast from "react-native-toast-message";
 import toastConfig from "@/components/common/CustomToast";
 
-const queryClient = new QueryClient();
+export const queryClient = new QueryClient();
 
 export default function RootLayout() {
   const { user } = useUserStore();

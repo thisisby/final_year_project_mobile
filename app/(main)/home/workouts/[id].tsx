@@ -12,6 +12,7 @@ import {
   Modal,
   KeyboardAvoidingView,
   Platform,
+  ActivityIndicator,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -32,6 +33,7 @@ import {
 } from "react-native-reanimated";
 import TrashLinearIcon from "@/components/ui/icons/TrashLinearIcon";
 import CloseSquareIcon from "@/components/ui/icons/CloseSquareIcon";
+import { useWorkouts } from "@/hooks/useWorkouts";
 
 interface ExerciseListItem {
   id: string;
@@ -93,6 +95,15 @@ export default function Page(): JSX.Element {
   const navigation = useNavigation();
   const router = useRouter();
   const { id } = useLocalSearchParams();
+  const { isLoading, data } = useWorkouts();
+
+  if (isLoading) {
+    return (
+      <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
+        <ActivityIndicator size="large" color="#0000ff" />
+      </View>
+    );
+  }
 
   const [isDropdownVisible, setIsDropdownVisible] = useState(false); // State to track dropdown visibility
 
@@ -122,7 +133,9 @@ export default function Page(): JSX.Element {
           <ArrowSquareLeftIcon width={30} height={30} />
         </TouchableOpacity>
         <View>
-          <Text style={styles.headerHeading}>Monday: Full-Body Workout</Text>
+          <Text style={styles.headerHeading}>
+            {data.payload.find((item) => item.id === Number(id)).title}
+          </Text>
         </View>
         <View>
           <TouchableOpacity onPress={toggleDropdown}>
@@ -223,27 +236,29 @@ export default function Page(): JSX.Element {
             numberOfLines={isExpanded ? undefined : 3}
             ellipsizeMode="tail"
           >
-            {loremText}
+            {data.payload.find((item) => item.id === Number(id)).description}
           </Text>
         </TouchableOpacity>
       </View>
 
       <View style={styles.sectionCard}>
-        {exerciseLists.map((item) => (
-          <TouchableOpacity
-            key={item.id}
-            style={styles.card3}
-            onPress={() => router.push(`/home/workout-exercises/${item.id}`)}
-          >
-            <View style={[styles.cardContent, { paddingVertical: 6 }]}>
-              <Text style={styles.cardTitle}>{item.title}</Text>
+        {data.payload
+          .find((item) => item.id === Number(id))
+          .exercises.map((item) => (
+            <TouchableOpacity
+              key={item.id}
+              style={styles.card3}
+              onPress={() => router.push(`/home/workout-exercises/${item.id}`)}
+            >
+              <View style={[styles.cardContent, { paddingVertical: 6 }]}>
+                <Text style={styles.cardTitle}>{item.exercise.name}</Text>
 
-              {item.description && (
-                <Text style={styles.cardDescription}>{item.description}</Text>
-              )}
-            </View>
-          </TouchableOpacity>
-        ))}
+                {item.main_note && (
+                  <Text style={styles.cardDescription}>{item.main_note}</Text>
+                )}
+              </View>
+            </TouchableOpacity>
+          ))}
       </View>
     </ScrollView>
   );

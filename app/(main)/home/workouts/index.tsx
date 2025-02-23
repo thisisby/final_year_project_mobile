@@ -6,6 +6,7 @@ import {
   TouchableOpacity,
   StyleSheet,
   ScrollView,
+  ActivityIndicator,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -20,68 +21,21 @@ import ArrowSquareLeftIcon from "@/components/ui/icons/ArrowSquareLeftIcon";
 import SettingLinearIcon from "@/components/ui/icons/SettingLinearIcon";
 import TimerLinearIcon from "@/components/ui/icons/TimerLinearIcon";
 import NoteLinearIcon from "@/components/ui/icons/NoteLinearIcon";
-
-interface ExerciseListItem {
-  id: string;
-  title: string;
-  count: number;
-  description?: string;
-}
-
-const exerciseLists: ExerciseListItem[] = [
-  { id: "1", title: "My Exercises", count: 29 },
-  { id: "134", title: "My Exercises", count: 29 },
-  { id: "2", title: "Wednesday: Full-Body Workout", count: 7 },
-  {
-    id: "3",
-    title: "Starting Strength: Workout B",
-    count: 3,
-    description: "Follow the same progression scheme as Workout A",
-  },
-  {
-    id: "22",
-    title: "Starting Strength: Workout B",
-    count: 3,
-    description: "Follow the same progression scheme as Workout A s asd  asdd",
-  },
-
-  {
-    id: "4",
-    title: "Arnold’s Golden Six",
-    count: 6,
-    description: "Classic full-body routine designed to build strength",
-  },
-  { id: "5", title: "Friday: Full-Body Workout", count: 7 },
-  {
-    id: "6",
-    title: "Monday: Full-Body Workout",
-    count: 7,
-    description: "Designed for beginners with gym access",
-  },
-  {
-    id: "7",
-    title: "Monday: Full-Body Workout",
-    count: 7,
-    description: "Designed for beginners with gym access",
-  },
-  {
-    id: "8",
-    title: "Monday: Full-Body Workout",
-    count: 7,
-    description: "Designed for beginners with gym access",
-  },
-  {
-    id: "9",
-    title: "Monday: Full-Body Workout",
-    count: 7,
-    description: "Designed for beginners with gym access",
-  },
-];
+import { useWorkouts } from "@/hooks/useWorkouts";
 
 export default function Page(): JSX.Element {
   const navigation = useNavigation();
   const router = useRouter();
   const [isDelete, setIsDelete] = React.useState(false);
+  const { isLoading, data } = useWorkouts();
+
+  if (isLoading) {
+    return (
+      <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
+        <ActivityIndicator size="large" color="#0000ff" />
+      </View>
+    );
+  }
 
   return (
     <ScrollView
@@ -151,7 +105,7 @@ export default function Page(): JSX.Element {
 
       {/* Exercise Lists */}
       <View style={styles.sectionCard}>
-        {exerciseLists.map((item) => (
+        {data.payload.map((item) => (
           <TouchableOpacity
             key={item.id}
             style={{

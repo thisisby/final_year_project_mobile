@@ -1,7 +1,7 @@
 import Avatar from "@/components/ui/Avatar";
 import Heading from "@/components/ui/Heading";
 import TextCustom from "@/components/ui/Text";
-import React from "react";
+import React, { useEffect } from "react";
 import {
   View,
   Text,
@@ -22,6 +22,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useUserStore } from "@/store/userStore";
 import WorkoutIcon from "@/components/ui/icons/WorkoutIcon";
 import NutritionIcon from "@/components/ui/icons/NutritionIcon";
+import { useWorkouts } from "@/hooks/useWorkouts";
 
 export default function Page() {
   const { user } = useUserStore();
@@ -29,6 +30,18 @@ export default function Page() {
   if (!user) {
     return <Redirect href="/(auth)/login" />;
   }
+
+  const { isLoading, data } = useWorkouts();
+
+  if (isLoading) {
+    return (
+      <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
+        <ActivityIndicator size="large" color="#0000ff" />
+      </View>
+    );
+  }
+
+  console.log("data");
 
   return (
     <ScrollView
@@ -98,7 +111,7 @@ export default function Page() {
               <View>
                 <Text style={styles.cardTitle}>Workouts</Text>
                 <Text style={{ color: "#898989", fontSize: 12 }}>
-                  22 workout guides
+                  {data.payload.length} workout guides
                 </Text>
               </View>
             </TouchableOpacity>
