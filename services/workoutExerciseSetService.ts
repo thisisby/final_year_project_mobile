@@ -18,3 +18,14 @@ export const getExerciseSets = async (
   );
   return response.data;
 };
+
+export const createExerciseSet = async (exerciseSet: CreateExerciseSet) => {
+  const response = await api.post(`/exercise-sets`, exerciseSet);
+  return response.data;
+};
+
+export type CreateExerciseSet = {
+  reps: number;
+  weight: number;
+  workout_exercise_id: number;
+};

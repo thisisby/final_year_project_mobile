@@ -115,15 +115,21 @@ export default function Page(): JSX.Element {
 
       {/* Exercise Lists */}
       <GestureHandlerRootView style={styles.sectionCard}>
-        {data.payload.map((item) => (
-          <SwipeableWorkoutItem
-            key={item.id}
-            item={item}
-            onDelete={handleDelete}
-            isLoading={isDeleteLoading}
-            onPress={() => router.push(`/home/workouts/${item.id}`)}
-          />
-        ))}
+        {data.payload.length > 0 ? (
+          data.payload.map((item) => (
+            <SwipeableWorkoutItem
+              key={item.id}
+              item={item}
+              onDelete={handleDelete}
+              isLoading={isDeleteLoading}
+              onPress={() => router.push(`/home/workouts/${item.id}`)}
+            />
+          ))
+        ) : (
+          <View style={styles.noRecordsContainer}>
+            <Text style={styles.noRecordsText}>You have no workouts yet</Text>
+          </View>
+        )}
       </GestureHandlerRootView>
     </ScrollView>
   );
@@ -169,4 +175,14 @@ const styles = StyleSheet.create({
   sectionCard: {
     borderRadius: 12,
   },
+  noRecordsContainer: {
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: "#e7eded",
+    borderStyle: "dashed",
+    padding: 10,
+    paddingVertical: 20,
+    marginTop: 20,
+  },
+  noRecordsText: { textAlign: "center" },
 });

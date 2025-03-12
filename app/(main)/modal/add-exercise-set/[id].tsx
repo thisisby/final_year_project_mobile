@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   View,
   Text,
@@ -6,15 +6,18 @@ import {
   StyleSheet,
   ScrollView,
   TextInput,
+  ActivityIndicator,
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import CloseSquareIcon from "@/components/ui/icons/CloseSquareIcon";
-import { router } from "expo-router";
+import { router, useLocalSearchParams } from "expo-router";
 import TickSquareIcon from "@/components/ui/icons/TickSquareIcon";
 import TickSquareBoldIcon from "@/components/ui/icons/TickSquareBoldIcon";
 import ArrowSquareLeftIcon from "@/components/ui/icons/ArrowSquareLeftIcon";
 import AddIcon from "@/components/ui/icons/AddIcon";
 import AddSquareLinearIcon from "@/components/ui/icons/AddSquareLinearIcon";
+import { useCreateExerciseSet } from "@/hooks/useExerciseSets";
+import { useExerciseSetStore } from "@/store/exerciseSetStore";
 
 export default function Page(): JSX.Element {
   const navigation = useNavigation();
@@ -27,14 +30,35 @@ export default function Page(): JSX.Element {
   const [workoutName, setWorkoutName] = useState("");
   const [workoutDescription, setWorkoutDescription] = useState("");
 
+  const { reps: storeReps, weight: storeWeight } = useExerciseSetStore();
+
+  const { id } = useLocalSearchParams();
+
   console.log(reps);
   const [name, setName] = useState("");
   const [value, setValue] = useState("");
+
+  useEffect(() => {
+    setReps(storeReps);
+    setWeight(storeWeight);
+  }, [storeReps, storeWeight]);
 
   const handleContinue = () => {
     if (workoutName) {
       setStage(2); // Move to the next stage
     }
+  };
+
+  const { createExerciseSet, isLoading } = useCreateExerciseSet();
+
+  const handleSave = async () => {
+    await createExerciseSet({
+      reps,
+      weight,
+      workout_exercise_id: Number(id),
+    });
+
+    navigation.goBack();
   };
 
   return (
@@ -103,8 +127,8 @@ export default function Page(): JSX.Element {
               placeholderTextColor="#999999"
               value={String(reps)}
               onChangeText={(text) => setReps(Number(text))}
-              multiline={true}
               keyboardType="numeric"
+              maxLength={3}
             />
             <TouchableOpacity
               onPress={() => setReps((reps) => Number(reps) + 1)}
@@ -177,7 +201,8 @@ export default function Page(): JSX.Element {
               placeholderTextColor="#999999"
               value={String(weight)}
               onChangeText={(text) => setWeight(Number(text))}
-              multiline={true}
+              maxLength={3}
+              keyboardType="numeric"
             />
             <TouchableOpacity
               onPress={() => setWeight((weight) => Number(weight) + 1)}
@@ -201,11 +226,12 @@ export default function Page(): JSX.Element {
             </TouchableOpacity>
           </View>
 
-          <TouchableOpacity
-            style={styles.continueButton}
-            onPress={handleContinue}
-          >
-            <Text style={styles.continueText}>Save</Text>
+          <TouchableOpacity style={styles.continueButton} onPress={handleSave}>
+            {isLoading ? (
+              <ActivityIndicator size="small" color="#fff" />
+            ) : (
+              <Text style={styles.continueText}>Save</Text>
+            )}
           </TouchableOpacity>
         </View>
       </ScrollView>

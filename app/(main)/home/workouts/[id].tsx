@@ -34,6 +34,7 @@ import {
 import TrashLinearIcon from "@/components/ui/icons/TrashLinearIcon";
 import CloseSquareIcon from "@/components/ui/icons/CloseSquareIcon";
 import { useDeleteWorkout, useWorkouts } from "@/hooks/useWorkouts";
+import EditLinearIcon from "@/components/ui/icons/EditLinearIcon";
 
 interface ExerciseListItem {
   id: string;
@@ -192,10 +193,15 @@ export default function Page(): JSX.Element {
                   <View
                     style={[styles.cardIcon2, { backgroundColor: "#1f1f1f" }]}
                   >
-                    <Ionicons name="reader-outline" size={22} color="#fff" />
+                    <EditLinearIcon width={22} height={22} color="#fff" />
                   </View>
                   <View style={styles.cardContent}>
-                    <Text style={[styles.cardTitle, { color: "#fff" }]}>
+                    <Text
+                      style={[
+                        styles.cardTitle,
+                        { color: "#fff", fontWeight: "500" },
+                      ]}
+                    >
                       Edit
                     </Text>
                   </View>
@@ -216,11 +222,16 @@ export default function Page(): JSX.Element {
                     {isDeleteLoading ? (
                       <ActivityIndicator size="small" color="#fff" />
                     ) : (
-                      <TrashLinearIcon width={22} height={22} color="#fff" />
+                      <TrashLinearIcon width={23} height={23} color="#fff" />
                     )}
                   </View>
                   <View style={styles.cardContent}>
-                    <Text style={[styles.cardTitle, { color: "#fff" }]}>
+                    <Text
+                      style={[
+                        styles.cardTitle,
+                        { color: "#fff", fontWeight: "500" },
+                      ]}
+                    >
                       Delete
                     </Text>
                   </View>
