@@ -156,7 +156,10 @@ export default function Page(): JSX.Element {
                 placeholder="Lower Body, Upper Body, etc."
                 placeholderTextColor="#999999"
                 value={workoutName}
-                onChangeText={setWorkoutName}
+                onChangeText={(text) =>
+                  setWorkoutName(text.replace(/\s{2,}/g, " "))
+                }
+                maxLength={30}
               />
 
               <Text

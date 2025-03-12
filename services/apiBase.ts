@@ -1,12 +1,31 @@
 // api.ts
 import axios from "axios";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { useUserStore } from "@/store/userStore";
+import { router } from "expo-router";
 
-const BASE_URL = "http://3.87.183.239/api/v1";
+// const BASE_URL = "http://3.87.183.239/api/v1";
+const BASE_URL = `http://192.168.0.75:8080/api/v1`;
 
 const api = axios.create({
   baseURL: BASE_URL,
 });
+
+// Add an interceptor to handle 401 responses
+api.interceptors.response.use(
+  (response) => response,
+  async (error) => {
+    if (error.response?.status === 401) {
+      console.log("Unauthorized - redirecting to login");
+      const clearUser = useUserStore.getState().clearUser;
+
+      await AsyncStorage.removeItem("jwtToken");
+      clearUser();
+      router.replace("/(auth)/login");
+    }
+    return Promise.reject(error);
+  }
+);
 
 api.interceptors.request.use(
   async (config) => {

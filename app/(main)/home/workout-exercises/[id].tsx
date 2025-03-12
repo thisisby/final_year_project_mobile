@@ -1,4 +1,10 @@
-import React, { useState, useEffect } from "react";
+import React, {
+  useState,
+  useEffect,
+  useRef,
+  useCallback,
+  useMemo,
+} from "react";
 import {
   View,
   Text,
@@ -7,6 +13,7 @@ import {
   TouchableWithoutFeedback,
   ActivityIndicator,
   StyleSheet,
+  TextInput,
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import { useRouter, useLocalSearchParams } from "expo-router";
@@ -16,6 +23,9 @@ import CloseSquareIcon from "@/components/ui/icons/CloseSquareIcon";
 import SettingLinearIcon from "@/components/ui/icons/SettingLinearIcon";
 import TrashLinearIcon from "@/components/ui/icons/TrashLinearIcon";
 import { useExerciseSets } from "@/hooks/useExerciseSets";
+import Slider from "@react-native-community/slider";
+import { useKeyboardStore } from "@/store/tabbarStore";
+import { useDeleteWorkoutExercise } from "@/hooks/useWorkoutExercise";
 
 export default function Page(): JSX.Element {
   const navigation = useNavigation();
@@ -27,6 +37,26 @@ export default function Page(): JSX.Element {
   const closeDropdown = () => setIsDropdownVisible(false);
 
   const { isLoading, data } = useExerciseSets(Number(id));
+
+  // Move all hooks above any conditional returns
+  const groupedByDate = useMemo(() => {
+    if (!data?.payload) return {};
+    return data.payload.reduce((acc, exercise) => {
+      const date = exercise.created_at.split("T")[0];
+      if (!acc[date]) acc[date] = [];
+      acc[date].push(exercise);
+      return acc;
+    }, {});
+  }, [data]);
+
+  const sortedGroupedByDate = useMemo(() => {
+    return Object.keys(groupedByDate)
+      .sort((a, b) => new Date(b) - new Date(a))
+      .reduce((acc, date) => {
+        acc[date] = groupedByDate[date];
+        return acc;
+      }, {});
+  }, [groupedByDate]);
 
   if (isLoading) {
     return (
@@ -54,21 +84,20 @@ export default function Page(): JSX.Element {
 
     return date.toLocaleDateString("en-GB", options);
   }
-  const groupedByDate = data.payload.reduce((acc, exercise) => {
-    const date = exercise.created_at.split("T")[0];
-    if (!acc[date]) acc[date] = [];
-    acc[date].push(exercise);
-    return acc;
-  }, {});
 
-  const renderDropdownItem = (title, icon, onPress) => (
-    <TouchableOpacity style={styles.dropdownItem} onPress={onPress}>
-      <View style={styles.cardIcon2}>{icon}</View>
-      <View style={styles.cardContent}>
-        <Text style={styles.cardTitle}>{title}</Text>
-      </View>
-    </TouchableOpacity>
-  );
+  const { deleteWorkoutExercise, isLoading: isDeleteLoading } =
+    useDeleteWorkoutExercise();
+
+  const handleDelete = async () => {
+    console.log("Deleted item with id:", id);
+    await deleteWorkoutExercise(Number(id));
+    navigation.goBack();
+  };
+
+  // useEffect(() => {
+  //   setReps(data.payload[0].reps.toString());
+  //   setWeight(data.payload[0].weight.toString());
+  // }, [data]);
 
   return (
     <ScrollView
@@ -93,49 +122,161 @@ export default function Page(): JSX.Element {
         <TouchableWithoutFeedback onPress={closeDropdown}>
           <View style={styles.overlay}>
             <View style={styles.dropdown}>
-              {renderDropdownItem(
-                "Edit",
-                <Ionicons name="reader-outline" size={22} color="#fff" />,
-                () => router.push(`/modal/edit-workout-exercise/${id}`)
-              )}
-              {renderDropdownItem(
-                "Delete",
-                <Ionicons name="reader-outline" size={22} color="#fff" />,
-                () => router.push(`/modal/edit-workout/${id}`)
-              )}
-              {renderDropdownItem(
-                "Info",
-                <TrashLinearIcon color="#fff" width={24} height={24} />,
-                () => {}
-              )}
+              <TouchableOpacity
+                style={[styles.dropdownItem, { borderBottomWidth: 1 }]}
+                onPress={() =>
+                  router.push(`/modal/edit-workout-exercise/${id}`)
+                }
+              >
+                <View style={styles.cardIcon2}>
+                  <Ionicons name="reader-outline" size={22} color="#fff" />
+                </View>
+                <View style={styles.cardContent}>
+                  <Text style={styles.cardTitle}>Edit</Text>
+                </View>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                style={[styles.dropdownItem, { borderBottomWidth: 1 }]}
+                onPress={() =>
+                  router.push(`/modal/edit-workout-exercise/${id}`)
+                }
+              >
+                <View style={styles.cardIcon2}>
+                  <Ionicons name="reader-outline" size={22} color="#fff" />
+                </View>
+                <View style={styles.cardContent}>
+                  <Text style={styles.cardTitle}>Info</Text>
+                </View>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                style={[styles.dropdownItem, { borderBottomWidth: 0 }]}
+                onPress={handleDelete}
+              >
+                <View style={styles.cardIcon2}>
+                  {isDeleteLoading ? (
+                    <ActivityIndicator size="small" color="#fff" />
+                  ) : (
+                    <TrashLinearIcon color="#fff" width={24} height={24} />
+                  )}
+                </View>
+                <View style={styles.cardContent}>
+                  <Text style={styles.cardTitle}>Delete</Text>
+                </View>
+              </TouchableOpacity>
             </View>
           </View>
         </TouchableWithoutFeedback>
       )}
 
-      {Object.entries(groupedByDate).map(([date, exercises]) => (
-        <View key={date} style={styles.sectionCard}>
-          <Text style={styles.sectionHeader}>{getFormattedDate(date)}</Text>
-          <View style={styles.exerciseContainer}>
-            {exercises.map((exercise, i) => (
-              <TouchableOpacity
-                key={exercise.id}
-                style={[
-                  styles.card3,
-                  i === exercises.length - 1 && { borderBottomWidth: 0 },
-                ]}
-                onPress={() => router.push(`/home/workouts/${exercise.id}`)}
-              >
-                <Text>{getTimeFromISO(exercise.created_at)}</Text>
-                <View style={styles.exerciseDetails}>
-                  <Text style={styles.reps}>{exercise.reps} reps</Text>
-                  <Text style={styles.weight}>{exercise.weight} kg</Text>
-                </View>
-              </TouchableOpacity>
-            ))}
+      <View style={{ marginBottom: 20 }}>
+        <TouchableOpacity
+          style={{
+            flexDirection: "row",
+            alignItems: "center",
+            padding: 8,
+            backgroundColor: "#f8f9f9",
+            borderBottomColor: "#e7eded",
+            borderBottomWidth: 1,
+            borderTopLeftRadius: 10,
+            borderTopRightRadius: 10,
+          }}
+          onPress={() => router.push(`/home/analytics/${id}`)}
+        >
+          <View
+            style={{
+              marginRight: 10,
+              padding: 5,
+              backgroundColor: "#efefef",
+              borderRadius: 8,
+            }}
+          >
+            <Ionicons name="reader-outline" size={22} color="#52b788" />
           </View>
+          <View style={styles.cardContent}>
+            <Text
+              style={{
+                fontSize: 16,
+                color: "#1f1f1f",
+              }}
+            >
+              Analytics
+            </Text>
+          </View>
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          style={{
+            flexDirection: "row",
+            alignItems: "center",
+            padding: 8,
+            backgroundColor: "#f8f9f9",
+            borderBottomLeftRadius: 10,
+            borderBottomRightRadius: 10,
+          }}
+        >
+          <View
+            style={{
+              marginRight: 10,
+              padding: 5,
+              backgroundColor: "#efefef",
+              borderRadius: 8,
+            }}
+          >
+            <Ionicons name="reader-outline" size={22} color="#52b788" />
+          </View>
+          <View style={styles.cardContent}>
+            <Text
+              style={{
+                fontSize: 16,
+                color: "#1f1f1f",
+              }}
+            >
+              1RM
+            </Text>
+          </View>
+        </TouchableOpacity>
+      </View>
+
+      {Object.keys(sortedGroupedByDate).length < 1 ? (
+        <View
+          style={{
+            borderRadius: 10,
+            borderWidth: 1,
+            borderColor: "#e7eded",
+            borderStyle: "dashed",
+            padding: 10,
+            paddingVertical: 20,
+            marginTop: 20,
+          }}
+        >
+          <Text style={{ textAlign: "center" }}>You have no records yet</Text>
         </View>
-      ))}
+      ) : (
+        Object.entries(sortedGroupedByDate).map(([date, exercises]) => (
+          <View key={date} style={styles.sectionCard}>
+            <Text style={styles.sectionHeader}>{getFormattedDate(date)}</Text>
+            <View style={styles.exerciseContainer}>
+              {exercises.map((exercise, i) => (
+                <TouchableOpacity
+                  key={exercise.id}
+                  style={[
+                    styles.card3,
+                    i === exercises.length - 1 && { borderBottomWidth: 0 },
+                  ]}
+                >
+                  <Text>{getTimeFromISO(exercise.created_at)}</Text>
+                  <View style={styles.exerciseDetails}>
+                    <Text style={styles.reps}>{exercise.reps} reps</Text>
+                    <Text style={styles.weight}>{exercise.weight} kg</Text>
+                  </View>
+                </TouchableOpacity>
+              ))}
+            </View>
+          </View>
+        ))
+      )}
     </ScrollView>
   );
 }
@@ -175,14 +316,14 @@ const styles = StyleSheet.create({
   dropdownItem: {
     flexDirection: "row",
     alignItems: "center",
-    paddingVertical: 8,
+    paddingVertical: 4,
     borderBottomWidth: 1,
-    borderBottomColor: "#444",
+    borderBottomColor: "#1f1f1f",
   },
   cardIcon2: {
     marginRight: 10,
     padding: 5,
-    backgroundColor: "#f2f3f8",
+    backgroundColor: "#1f1f1f",
     borderRadius: 8,
   },
   cardContent: {},
@@ -205,6 +346,7 @@ const styles = StyleSheet.create({
     padding: 12,
     borderBottomWidth: 1,
     borderBottomColor: "#e7eded",
+    alignItems: "center",
   },
   exerciseDetails: { flexDirection: "row", gap: 30 },
   reps: { color: "#525e75", fontWeight: "500" },

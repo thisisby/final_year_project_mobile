@@ -33,7 +33,7 @@ import {
 } from "react-native-reanimated";
 import TrashLinearIcon from "@/components/ui/icons/TrashLinearIcon";
 import CloseSquareIcon from "@/components/ui/icons/CloseSquareIcon";
-import { useWorkouts } from "@/hooks/useWorkouts";
+import { useDeleteWorkout, useWorkouts } from "@/hooks/useWorkouts";
 
 interface ExerciseListItem {
   id: string;
@@ -96,6 +96,14 @@ export default function Page(): JSX.Element {
   const router = useRouter();
   const { id } = useLocalSearchParams();
   const { isLoading, data } = useWorkouts();
+
+  const { deleteWorkout, isLoading: isDeleteLoading } = useDeleteWorkout();
+
+  const handleDelete = async (id: number) => {
+    console.log("Deleted item with id:", id);
+    await deleteWorkout(id);
+    navigation.goBack();
+  };
 
   if (isLoading) {
     return (
@@ -200,11 +208,16 @@ export default function Page(): JSX.Element {
                       borderBottomRightRadius: 10,
                     },
                   ]}
+                  onPress={() => handleDelete(Number(id))}
                 >
                   <View
                     style={[styles.cardIcon2, { backgroundColor: "#1f1f1f" }]}
                   >
-                    <TrashLinearIcon color="#fff" width={24} height={24} />
+                    {isDeleteLoading ? (
+                      <ActivityIndicator size="small" color="#fff" />
+                    ) : (
+                      <TrashLinearIcon width={22} height={22} color="#fff" />
+                    )}
                   </View>
                   <View style={styles.cardContent}>
                     <Text style={[styles.cardTitle, { color: "#fff" }]}>

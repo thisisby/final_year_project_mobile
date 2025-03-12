@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   View,
   Text,
@@ -6,30 +6,63 @@ import {
   StyleSheet,
   ScrollView,
   TextInput,
+  ActivityIndicator,
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import CloseSquareIcon from "@/components/ui/icons/CloseSquareIcon";
-import { router } from "expo-router";
+import { router, useLocalSearchParams } from "expo-router";
 import TickSquareIcon from "@/components/ui/icons/TickSquareIcon";
 import TickSquareBoldIcon from "@/components/ui/icons/TickSquareBoldIcon";
 import ArrowSquareLeftIcon from "@/components/ui/icons/ArrowSquareLeftIcon";
 import AddIcon from "@/components/ui/icons/AddIcon";
 import AddSquareLinearIcon from "@/components/ui/icons/AddSquareLinearIcon";
+import { usePatchWorkoutExercise } from "@/hooks/useWorkoutExercise";
+import { useWorkouts } from "@/hooks/useWorkouts";
 
 export default function Page(): JSX.Element {
   const navigation = useNavigation();
-  const [search, setSearch] = useState("");
-  const [newExercise, setNewExercise] = useState(false);
-  const [selectedExercises, setSelectedExercises] = useState<string[]>([]);
-  const [stage, setStage] = useState(1); // 1: Initial stage, 2: Search and exercise selection
-  const [workoutName, setWorkoutName] = useState("");
-  const [workoutDescription, setWorkoutDescription] = useState("");
+  const [exerciseDescription, setExerciseDescription] = useState("");
 
-  const handleContinue = () => {
-    if (workoutName) {
-      setStage(2); // Move to the next stage
-    }
+  const { isLoading, data } = useWorkouts();
+  const { id } = useLocalSearchParams();
+
+
+  const { patchWorkoutExercise, isLoading: isPatchLoading } = usePatchWorkoutExercise();
+
+  const handleSave = async () => {
+    await patchWorkoutExercise({
+      id: Number(id),
+      patchWorkoutExercise: {
+        main_note: exerciseDescription,
+      },
+    });
+
+    navigation.goBack();
   };
+
+  useEffect(() => {
+    if (!isLoading && data) {
+      for (let workout of data.payload) {
+        const foundExercise = workout.exercises.find(ex => ex.id === Number(id));
+        if (foundExercise) {
+          setExerciseDescription(foundExercise.main_note);
+          break;
+        }
+      }
+
+    }
+  }, [isLoading, data]);
+
+  
+  if (isLoading) {
+    return (
+      <ActivityIndicator
+        style={{ flex: 1, justifyContent: "center", alignItems: "center" }} // Center the loader
+        size="large"
+        color="#1f1f1f"
+      />
+    );
+  }
 
   return (
     <View style={styles.container}>
@@ -39,15 +72,11 @@ export default function Page(): JSX.Element {
         }}
       >
         <View style={styles.header}>
-          {stage === 1 ? (
+          
             <TouchableOpacity onPress={() => navigation.goBack()}>
               <CloseSquareIcon width={36} height={36} />
             </TouchableOpacity>
-          ) : (
-            <TouchableOpacity onPress={() => setStage(1)}>
-              <ArrowSquareLeftIcon width={36} height={36} />
-            </TouchableOpacity>
-          )}
+
 
           <View>
             <Text style={styles.headerHeading}>Edit Exercise</Text>
@@ -62,21 +91,26 @@ export default function Page(): JSX.Element {
               marginBottom: 4,
             }}
           >
-            Name
+            Note
           </Text>
           <TextInput
             style={[styles.input, { marginBottom: 18 }]}
-            placeholder="Lower Body, Upper Body, etc."
+            placeholder="3 sets of 10 reps with 10kg weight"
             placeholderTextColor="#999999"
-            value={workoutName}
-            onChangeText={setWorkoutName}
+            value={exerciseDescription}
+            onChangeText={setExerciseDescription}
+            multiline={true}
           />
 
           <TouchableOpacity
             style={styles.continueButton}
-            onPress={handleContinue}
+            onPress={handleSave}
           >
-            <Text style={styles.continueText}>Save</Text>
+            {isPatchLoading ? (
+              <ActivityIndicator size="small" color="#fff " />
+            ) : (
+              <Text style={styles.continueText}>Save</Text>
+            )}
           </TouchableOpacity>
         </View>
       </ScrollView>

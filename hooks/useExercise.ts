@@ -11,7 +11,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 export function useCreateCustomExercise() {
   const mutation = useMutation(createCustomExercise, {
     onSuccess: (data) => {
-      queryClient.invalidateQueries({ queryKey: ["my-exercises"] });
+      queryClient.invalidateQueries({ queryKey: ["my-exercises", "exercises", "workouts"] });
       console.log("exercise Created", data);
     },
     onError: (error) => {

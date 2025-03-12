@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import {
   View,
   Text,
@@ -21,13 +21,23 @@ import ArrowSquareLeftIcon from "@/components/ui/icons/ArrowSquareLeftIcon";
 import SettingLinearIcon from "@/components/ui/icons/SettingLinearIcon";
 import TimerLinearIcon from "@/components/ui/icons/TimerLinearIcon";
 import NoteLinearIcon from "@/components/ui/icons/NoteLinearIcon";
-import { useWorkouts } from "@/hooks/useWorkouts";
+import { useDeleteWorkout, useWorkouts } from "@/hooks/useWorkouts";
+import SwipeableWorkoutItem from "@/components/SwipeableItem"; // Import the new component
+import { GestureHandlerRootView } from "react-native-gesture-handler";
 
 export default function Page(): JSX.Element {
   const navigation = useNavigation();
   const router = useRouter();
   const [isDelete, setIsDelete] = React.useState(false);
   const { isLoading, data } = useWorkouts();
+
+  const { deleteWorkout, isLoading: isDeleteLoading } = useDeleteWorkout();
+
+  const handleDelete = (id: number) => {
+    // Implement your delete logic here
+    console.log("Deleted item with id:", id);
+    deleteWorkout(id);
+  };
 
   if (isLoading) {
     return (
@@ -104,50 +114,17 @@ export default function Page(): JSX.Element {
       </Text>
 
       {/* Exercise Lists */}
-      <View style={styles.sectionCard}>
+      <GestureHandlerRootView style={styles.sectionCard}>
         {data.payload.map((item) => (
-          <TouchableOpacity
+          <SwipeableWorkoutItem
             key={item.id}
-            style={{
-              paddingVertical: 8,
-              paddingHorizontal: 10,
-              borderRadius: 8,
-              borderWidth: 1,
-              borderColor: "#efefef",
-              display: "flex",
-              flexDirection: "row",
-              gap: 10,
-              alignItems: "center",
-              marginBottom: 6,
-            }}
+            item={item}
+            onDelete={handleDelete}
+            isLoading={isDeleteLoading}
             onPress={() => router.push(`/home/workouts/${item.id}`)}
-          >
-            <View
-              style={{
-                padding: 4,
-                borderRadius: 6,
-                backgroundColor: "#f1f1f1",
-              }}
-            >
-              <NoteLinearIcon width={24} height={24} />
-            </View>
-            <View style={{ flex: 1 }}>
-              <Text style={{ fontSize: 14, fontWeight: "bold" }}>
-                {item.title}
-              </Text>
-              {item.description && (
-                <Text
-                  style={{ fontSize: 12, color: "#666", marginTop: 2 }}
-                  numberOfLines={1}
-                  ellipsizeMode="tail"
-                >
-                  {item.description}
-                </Text>
-              )}
-            </View>
-          </TouchableOpacity>
+          />
         ))}
-      </View>
+      </GestureHandlerRootView>
     </ScrollView>
   );
 }
@@ -157,8 +134,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     flex: 1,
   },
-
-  // Sticky Header
   header: {
     height: 60,
     flexDirection: "row",
@@ -168,98 +143,11 @@ const styles = StyleSheet.create({
     marginBottom: 20,
     marginTop: 10,
   },
-  headerTitle: { fontSize: 18, fontWeight: "bold" },
-
-  // Sections
-  section: {
-    backgroundColor: "#F7F8FA",
-    borderRadius: 5,
-    marginHorizontal: 16,
-    padding: 10,
-    marginVertical: 10,
-  },
-  section2: {
-    backgroundColor: "#F7F8FA",
-    borderRadius: 12,
-    marginHorizontal: 16,
-    marginVertical: 10,
-  },
-  card2: {
-    flexDirection: "row",
-    alignItems: "center",
-    paddingVertical: 8,
-    paddingHorizontal: 20,
-    borderBottomWidth: 1,
-    borderBottomColor: "#E5E5E5",
-  },
-  lastCard: {
-    borderBottomWidth: 0,
-  },
-  sectionCard: {
-    // backgroundColor: "#F7F8FA",
-    borderRadius: 12,
-  },
-  sectionHeader: {
+  headerHeading: {
+    fontWeight: 700,
     fontSize: 16,
-    fontWeight: "bold",
-    paddingHorizontal: 16,
-    marginTop: 20,
+    textAlign: "center",
   },
-
-  // List Items
-  listItem: { fontSize: 16, paddingVertical: 8 },
-  greenText: { color: "white" },
-
-  // Cards
-  card3: {
-    flexDirection: "row",
-    alignItems: "center",
-    padding: 8,
-    backgroundColor: "#f8f9f9",
-    borderRadius: 10,
-    marginBottom: 3,
-  },
-
-  cardIcon: { marginRight: 10 },
-  cardIcon2: {
-    marginRight: 10,
-    padding: 5,
-    backgroundColor: "#f2f3f8",
-    borderRadius: 8,
-  },
-  cardContent: {},
-  cardTitle: { fontSize: 16, fontWeight: 600 },
-  cardDescription: { fontSize: 12, color: "#666" },
-  cardCount: { fontSize: 16, fontWeight: "bold", color: "#777" },
-
-  // Templates
-  templatesGrid: {
-    flexDirection: "row",
-    flexWrap: "wrap",
-    justifyContent: "space-between",
-    padding: 16,
-  },
-  templateCard: {
-    width: "48%",
-    backgroundColor: "#F7F8FA",
-    padding: 12,
-    borderRadius: 8,
-    marginBottom: 10,
-  },
-  templateTitle: { fontSize: 16, marginBottom: 4 },
-  templateExercises: { fontSize: 14, color: "#666" },
-
-  // Bottom Navigation
-  bottomNav: {
-    flexDirection: "row",
-    justifyContent: "space-around",
-    borderTopWidth: 1,
-    borderTopColor: "#ddd",
-    backgroundColor: "white",
-    paddingVertical: 10,
-  },
-  navItem: { alignItems: "center" },
-  navText: { fontSize: 12, color: "gray", marginTop: 4 },
   habbit: {
     display: "flex",
     flexDirection: "row",
@@ -277,14 +165,8 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     padding: 14,
   },
-  headerHeading: {
-    fontWeight: 700,
-    fontSize: 16,
-    textAlign: "center",
-  },
-  headerName: {
-    color: "#898989",
-    textAlign: "center",
-    fontSize: 12,
+  cardTitle: { fontSize: 16, fontWeight: 600 },
+  sectionCard: {
+    borderRadius: 12,
   },
 });

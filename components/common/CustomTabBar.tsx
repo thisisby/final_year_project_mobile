@@ -7,7 +7,7 @@ import {
   Dimensions,
   Platform,
 } from "react-native";
-import { Link, usePathname } from "expo-router";
+import { Link, usePathname, useRouter } from "expo-router";
 import HomeIcon from "../ui/icons/HomeIcon";
 import NoteIcon from "../ui/icons/NoteIcon";
 import SmsIcon from "../ui/icons/SmsIcon";
@@ -25,12 +25,17 @@ import Animated, {
 } from "react-native-reanimated";
 import ArrangeSquareLinearIcon from "../ui/icons/ArrangeSquareLinearIcon";
 import AddSquareLinearIcon from "../ui/icons/AddSquareLinearIcon";
+import { useKeyboardStore } from "@/store/tabbarStore";
 
 const { width } = Dimensions.get("window");
 
 export default function CustomTabBar() {
+  const router = useRouter();
   const pathname = usePathname();
   const isDisabled = pathname.split("/").length === 2;
+  const { count, inc } = useKeyboardStore();
+
+  const isWorkoutPage = pathname.startsWith("/home/workouts/");
 
   // Check if the current route matches `/home/workout-exercises/{slug}`
   const isWorkoutExercisePage = pathname.startsWith("/home/workout-exercises/");
@@ -51,6 +56,8 @@ export default function CustomTabBar() {
 
   const isModal = pathname.includes("modal") && Platform.OS === "android";
 
+  console.log(pathname);
+
   const render = () => {
     if (isWorkoutExercisePage) {
       return (
@@ -61,7 +68,9 @@ export default function CustomTabBar() {
             justifyContent: "center",
             alignItems: "center",
           }}
-          onPress={() => console.log("Add Button Pressed")}
+          onPress={() =>
+            router.push(`/modal/add-exercise-set/${pathname.split("/")[3]}`)
+          }
         >
           <Animated.View
             style={{
@@ -126,6 +135,34 @@ export default function CustomTabBar() {
             <AddSquareLinearIcon color={"#FFFFFF"} />
             <Text style={{ color: "#FFFFFF", marginLeft: 10 }}>
               ADD NEW RECORD
+            </Text>
+          </Animated.View>
+        </TouchableOpacity>
+      );
+    } else if (isWorkoutPage) {
+      return (
+        <TouchableOpacity
+          style={{
+            flex: 1,
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+          }}
+          onPress={() =>
+            router.push(`/modal/add-exercise/${pathname.split("/")[3]}`)
+          }
+        >
+          <Animated.View
+            style={{
+              flexDirection: "row",
+              alignItems: "center",
+            }}
+            entering={FadeInDown}
+            exiting={FadeOutDown}
+          >
+            <AddSquareLinearIcon color={"#FFFFFF"} />
+            <Text style={{ color: "#FFFFFF", marginLeft: 10 }}>
+              ADD NEW EXERCISE
             </Text>
           </Animated.View>
         </TouchableOpacity>
@@ -197,6 +234,7 @@ export default function CustomTabBar() {
       });
     }
   };
+
   return (
     <View
       style={[styles.container, isModal && { opacity: 0 }]}

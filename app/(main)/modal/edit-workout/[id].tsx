@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   View,
   Text,
@@ -6,29 +6,57 @@ import {
   StyleSheet,
   ScrollView,
   TextInput,
+  ActivityIndicator,
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import CloseSquareIcon from "@/components/ui/icons/CloseSquareIcon";
-import { router } from "expo-router";
+import { router, useLocalSearchParams } from "expo-router";
 import TickSquareIcon from "@/components/ui/icons/TickSquareIcon";
 import TickSquareBoldIcon from "@/components/ui/icons/TickSquareBoldIcon";
 import ArrowSquareLeftIcon from "@/components/ui/icons/ArrowSquareLeftIcon";
 import AddIcon from "@/components/ui/icons/AddIcon";
 import AddSquareLinearIcon from "@/components/ui/icons/AddSquareLinearIcon";
+import { usePatchWorkout, useWorkouts } from "@/hooks/useWorkouts";
 
 export default function Page(): JSX.Element {
   const navigation = useNavigation();
-  const [search, setSearch] = useState("");
-  const [newExercise, setNewExercise] = useState(false);
-  const [selectedExercises, setSelectedExercises] = useState<string[]>([]);
   const [stage, setStage] = useState(1); // 1: Initial stage, 2: Search and exercise selection
   const [workoutName, setWorkoutName] = useState("");
   const [workoutDescription, setWorkoutDescription] = useState("");
+  const { isLoading, data } = useWorkouts();
+  const { id } = useLocalSearchParams();
 
-  const handleContinue = () => {
-    if (workoutName) {
-      setStage(2); // Move to the next stage
+  const { patchWorkout, isLoading: isPatchLoading } = usePatchWorkout();
+
+  useEffect(() => {
+    if (!isLoading && data) {
+      const workout = data.payload.find((item) => item.id === Number(id));
+
+      setWorkoutName(workout.title);
+      setWorkoutDescription(workout.description);
     }
+  }, [isLoading, data]);
+
+  if (isLoading) {
+    return (
+      <ActivityIndicator
+        style={{ flex: 1, justifyContent: "center", alignItems: "center" }} // Center the loader
+        size="large"
+        color="#1f1f1f"
+      />
+    );
+  }
+
+  const handleContinue = async () => {
+    await patchWorkout({
+      id: Number(id),
+      patchWorkout: {
+        title: workoutName,
+        description: workoutDescription,
+      },
+    });
+
+    navigation.goBack();
   };
 
   return (
@@ -69,7 +97,27 @@ export default function Page(): JSX.Element {
             placeholder="Lower Body, Upper Body, etc."
             placeholderTextColor="#999999"
             value={workoutName}
-            onChangeText={setWorkoutName}
+            onChangeText={(text) =>
+              setWorkoutName(text.replace(/\s{2,}/g, " "))
+            }
+            maxLength={30}
+          />
+
+          <Text
+            style={{
+              fontSize: 14,
+              fontWeight: "700",
+              marginBottom: 4,
+            }}
+          >
+            Description
+          </Text>
+          <TextInput
+            style={[styles.input, { marginBottom: 18 }]}
+            placeholder="Lower Body, Upper Body, etc."
+            placeholderTextColor="#999999"
+            value={workoutDescription}
+            onChangeText={setWorkoutDescription}
             multiline={true}
           />
 
@@ -77,7 +125,11 @@ export default function Page(): JSX.Element {
             style={styles.continueButton}
             onPress={handleContinue}
           >
-            <Text style={styles.continueText}>Save</Text>
+            {isPatchLoading ? (
+              <ActivityIndicator size="small" color="#fff " />
+            ) : (
+              <Text style={styles.continueText}>Save</Text>
+            )}
           </TouchableOpacity>
         </View>
       </ScrollView>

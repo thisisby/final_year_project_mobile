@@ -1,6 +1,8 @@
 import axios from "axios";
 
-const API_URL = "http://3.87.183.239/api/v1";
+// const API_URL = "http://3.87.183.239/api/v1";
+const API_URL = "http://192.168.0.75:8080/api/v1";
+
 
 export type LoginCredentials = {
   email: string;

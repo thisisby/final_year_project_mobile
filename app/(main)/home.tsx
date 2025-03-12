@@ -111,7 +111,7 @@ export default function Page() {
               <View>
                 <Text style={styles.cardTitle}>Workouts</Text>
                 <Text style={{ color: "#898989", fontSize: 12 }}>
-                  {data.payload.length} workout guides
+                  {data?.payload?.length} workout guides
                 </Text>
               </View>
             </TouchableOpacity>

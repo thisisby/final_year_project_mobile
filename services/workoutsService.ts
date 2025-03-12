@@ -54,3 +54,25 @@ export const createWorkout = async (
 
   return response.data;
 };
+
+export const deleteWorkout = async (workoutID: number) => {
+  const response = await api.delete(`/workouts/${workoutID}`);
+
+  return response.data;
+};
+interface PatchWorkoutParams {
+  id: number;
+  patchWorkout: PatchWorkout;
+}
+export type PatchWorkout = {
+  title?: string;
+  description?: string;
+};
+export const patchWorkout = async ({
+  id,
+  patchWorkout,
+}: PatchWorkoutParams) => {
+  const response = await api.patch(`/workouts/${id}`, patchWorkout);
+
+  return response.data;
+};
