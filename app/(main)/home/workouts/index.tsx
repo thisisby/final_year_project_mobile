@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useRef, useState } from "react";
 import {
   View,
   Text,
@@ -30,7 +30,7 @@ export default function Page(): JSX.Element {
   const router = useRouter();
   const [isDelete, setIsDelete] = React.useState(false);
   const { isLoading, data } = useWorkouts();
-
+  const scrollViewRef = useRef(null);
   const { deleteWorkout, isLoading: isDeleteLoading } = useDeleteWorkout();
 
   const handleDelete = (id: number) => {
@@ -117,13 +117,51 @@ export default function Page(): JSX.Element {
       <GestureHandlerRootView style={styles.sectionCard}>
         {data.payload.length > 0 ? (
           data.payload.map((item) => (
-            <SwipeableWorkoutItem
+            <View
               key={item.id}
-              item={item}
-              onDelete={handleDelete}
-              isLoading={isDeleteLoading}
-              onPress={() => router.push(`/home/workouts/${item.id}`)}
-            />
+              style={{
+                backgroundColor: "#fff",
+                borderRadius: 8,
+                borderWidth: 1,
+                borderColor: "#efefef",
+                marginBottom: 6,
+              }}
+            >
+              <TouchableOpacity
+                style={{
+                  flexDirection: "row",
+                  alignItems: "center",
+                  gap: 10,
+                  paddingVertical: 8,
+                  paddingHorizontal: 10,
+                }}
+                onPress={() => router.push(`/home/workouts/${item.id}`)}
+              >
+                <View
+                  style={{
+                    padding: 4,
+                    borderRadius: 6,
+                    backgroundColor: "#f1f1f1",
+                  }}
+                >
+                  <NoteLinearIcon width={24} height={24} />
+                </View>
+                <View style={{ flex: 1 }}>
+                  <Text style={{ fontSize: 14, fontWeight: "bold" }}>
+                    {item.title}
+                  </Text>
+                  {item.description && (
+                    <Text
+                      style={{ fontSize: 12, color: "#666", marginTop: 2 }}
+                      numberOfLines={1}
+                      ellipsizeMode="tail"
+                    >
+                      {item.description}
+                    </Text>
+                  )}
+                </View>
+              </TouchableOpacity>
+            </View>
           ))
         ) : (
           <View style={styles.noRecordsContainer}>

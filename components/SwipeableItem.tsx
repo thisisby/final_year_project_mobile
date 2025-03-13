@@ -16,11 +16,18 @@ import Animated, {
 import NoteLinearIcon from "./ui/icons/NoteLinearIcon";
 import TrashLinearIcon from "./ui/icons/TrashLinearIcon";
 
-const SwipeableWorkoutItem = ({ item, onDelete, isLoading, onPress }) => {
+const SwipeableWorkoutItem = ({
+  item,
+  onDelete,
+  isLoading,
+  onPress,
+  scrollViewRef,
+}) => {
   const translateX = useSharedValue(0);
   const MAX_SWIPE_DISTANCE = -65; // Maximum swipe distance to reveal the delete button
 
   const panGesture = Gesture.Pan()
+    .simultaneousWithExternalGesture(scrollViewRef)
     .onUpdate((event) => {
       if (event.translationX < 0) {
         translateX.value = event.translationX;

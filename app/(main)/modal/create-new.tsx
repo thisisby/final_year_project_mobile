@@ -10,6 +10,7 @@ import {
   KeyboardAvoidingView,
   Dimensions,
   ActivityIndicator,
+  Switch,
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import CloseSquareIcon from "@/components/ui/icons/CloseSquareIcon";
@@ -39,6 +40,7 @@ export default function Page(): JSX.Element {
   const [workoutName, setWorkoutName] = useState("");
   const [workoutDescription, setWorkoutDescription] = useState("");
   const [exerciseLists, setExerciseLists] = useState<ExerciseListItem[]>([]);
+  const [isPrivate, setIsPrivate] = useState(false);
 
   const { createWorkout, isLoading: isCreateLoading } = useCreateWorkout();
 
@@ -57,6 +59,7 @@ export default function Page(): JSX.Element {
     const newWorkout: CreateWorkoutRequest = {
       title: workoutName,
       description: workoutDescription,
+      is_private: isPrivate,
       workoutExercises: selectedExercises,
     };
 
@@ -83,7 +86,11 @@ export default function Page(): JSX.Element {
     try {
       const newExercise = await createCustomExercise({ name: search });
       console.log("Created exercise:ssss", newExercise); // Now this should definitely log the data
-
+      const updatedExerciseLists = [
+        { id: newExercise.payload.id, name: search },
+        ...exerciseLists,
+      ];
+      setExerciseLists(updatedExerciseLists);
       setSelectedExercises([newExercise.payload.id, ...selectedExercises]);
     } catch (error) {
       console.error("Failed to create exercise:", error);
@@ -100,6 +107,7 @@ export default function Page(): JSX.Element {
     const combinedExercises = [
       ...(myExercisesData?.payload || []),
       ...(exercisesData?.payload || []),
+      ...exerciseLists,
     ];
 
     const uniqueExercises = Array.from(
@@ -179,6 +187,30 @@ export default function Page(): JSX.Element {
                 onChangeText={setWorkoutDescription}
                 multiline={true}
               />
+
+              <View
+                style={{
+                  flexDirection: "row",
+                  alignItems: "center",
+                  justifyContent: "space-between",
+                  marginBottom: 18,
+                  backgroundColor: "#efefef",
+                  paddingHorizontal: 8,
+                  paddingVertical: Platform.OS === "ios" ? 8 : 2,
+                  borderRadius: 10,
+                }}
+              >
+                <Text
+                  style={{
+                    fontSize: 14,
+                    fontWeight: "700",
+                    marginBottom: 4,
+                  }}
+                >
+                  Is Private
+                </Text>
+                <Switch value={isPrivate} onValueChange={setIsPrivate} />
+              </View>
             </View>
 
             <TouchableOpacity

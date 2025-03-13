@@ -33,7 +33,11 @@ import {
 } from "react-native-reanimated";
 import TrashLinearIcon from "@/components/ui/icons/TrashLinearIcon";
 import CloseSquareIcon from "@/components/ui/icons/CloseSquareIcon";
-import { useDeleteWorkout, useWorkouts } from "@/hooks/useWorkouts";
+import {
+  useDeleteWorkout,
+  useGetWorkoutByID,
+  useWorkouts,
+} from "@/hooks/useWorkouts";
 import EditLinearIcon from "@/components/ui/icons/EditLinearIcon";
 
 interface ExerciseListItem {
@@ -96,23 +100,17 @@ export default function Page(): JSX.Element {
   const navigation = useNavigation();
   const router = useRouter();
   const { id } = useLocalSearchParams();
-  const { isLoading, data } = useWorkouts();
 
   const { deleteWorkout, isLoading: isDeleteLoading } = useDeleteWorkout();
 
+  const { data: workout, isLoading: isWorkoutLoading } = useGetWorkoutByID(
+    Number(id)
+  );
   const handleDelete = async (id: number) => {
     console.log("Deleted item with id:", id);
     await deleteWorkout(id);
     navigation.goBack();
   };
-
-  if (isLoading) {
-    return (
-      <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
-        <ActivityIndicator size="large" color="#0000ff" />
-      </View>
-    );
-  }
 
   const [isDropdownVisible, setIsDropdownVisible] = useState(false); // State to track dropdown visibility
 
@@ -137,153 +135,169 @@ export default function Page(): JSX.Element {
       }}
       style={styles.container}
     >
-      <View style={styles.header}>
-        <TouchableOpacity onPress={() => navigation.goBack()}>
-          <ArrowSquareLeftIcon width={30} height={30} />
-        </TouchableOpacity>
-        <View>
-          <Text style={styles.headerHeading}>
-            {data.payload.find((item) => item.id === Number(id)).title}
-          </Text>
-        </View>
-        <View>
-          <TouchableOpacity onPress={toggleDropdown}>
-            {isDropdownVisible ? (
-              <CloseSquareIcon width={30} height={30} />
-            ) : (
-              <SettingLinearIcon width={30} height={30} />
-            )}
-          </TouchableOpacity>
-        </View>
-      </View>
-      {isDropdownVisible && (
-        <View
-          style={{
-            flex: 1,
-            position: "absolute",
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            zIndex: 999,
-          }}
-        >
-          <TouchableWithoutFeedback onPress={handleClose}>
+      {isWorkoutLoading ? (
+        <ActivityIndicator size="large" color="#0000ff" />
+      ) : (
+        <>
+          <View style={styles.header}>
+            <TouchableOpacity onPress={() => navigation.goBack()}>
+              <ArrowSquareLeftIcon width={30} height={30} />
+            </TouchableOpacity>
+            <View>
+              <Text style={styles.headerHeading}>
+                {workout?.payload?.title}
+              </Text>
+            </View>
+            <View>
+              <TouchableOpacity onPress={toggleDropdown}>
+                {isDropdownVisible ? (
+                  <CloseSquareIcon width={30} height={30} />
+                ) : (
+                  <SettingLinearIcon width={30} height={30} />
+                )}
+              </TouchableOpacity>
+            </View>
+          </View>
+          {isDropdownVisible && (
             <View
               style={{
                 flex: 1,
-                position: "relative",
+                position: "absolute",
+                top: 0,
+                left: 0,
+                right: 0,
+                bottom: 0,
+                zIndex: 999,
               }}
             >
-              <View style={[styles.dropdown]}>
-                <TouchableOpacity
-                  style={[
-                    styles.dropdownItem,
-                    {
-                      borderTopLeftRadius: 10,
-                      borderTopRightRadius: 10,
-                      borderBottomWidth: 1,
-                    },
-                  ]}
-                  onPress={() => {
-                    setIsDropdownVisible(false);
-                    router.push(`/modal/edit-workout/${id}`);
+              <TouchableWithoutFeedback onPress={handleClose}>
+                <View
+                  style={{
+                    flex: 1,
+                    position: "relative",
                   }}
                 >
-                  <View
-                    style={[styles.cardIcon2, { backgroundColor: "#1f1f1f" }]}
-                  >
-                    <EditLinearIcon width={22} height={22} color="#fff" />
-                  </View>
-                  <View style={styles.cardContent}>
-                    <Text
+                  <View style={[styles.dropdown]}>
+                    <TouchableOpacity
                       style={[
-                        styles.cardTitle,
-                        { color: "#fff", fontWeight: "500" },
+                        styles.dropdownItem,
+                        {
+                          borderTopLeftRadius: 10,
+                          borderTopRightRadius: 10,
+                          borderBottomWidth: 1,
+                        },
                       ]}
+                      onPress={() => {
+                        setIsDropdownVisible(false);
+                        router.push(`/modal/edit-workout/${id}`);
+                      }}
                     >
-                      Edit
-                    </Text>
-                  </View>
-                </TouchableOpacity>
-                <TouchableOpacity
-                  style={[
-                    styles.dropdownItem,
-                    {
-                      borderBottomLeftRadius: 10,
-                      borderBottomRightRadius: 10,
-                    },
-                  ]}
-                  onPress={() => handleDelete(Number(id))}
-                >
-                  <View
-                    style={[styles.cardIcon2, { backgroundColor: "#1f1f1f" }]}
-                  >
-                    {isDeleteLoading ? (
-                      <ActivityIndicator size="small" color="#fff" />
-                    ) : (
-                      <TrashLinearIcon width={23} height={23} color="#fff" />
-                    )}
-                  </View>
-                  <View style={styles.cardContent}>
-                    <Text
+                      <View
+                        style={[
+                          styles.cardIcon2,
+                          { backgroundColor: "#1f1f1f" },
+                        ]}
+                      >
+                        <EditLinearIcon width={22} height={22} color="#fff" />
+                      </View>
+                      <View style={styles.cardContent}>
+                        <Text
+                          style={[
+                            styles.cardTitle,
+                            { color: "#fff", fontWeight: "500" },
+                          ]}
+                        >
+                          Edit
+                        </Text>
+                      </View>
+                    </TouchableOpacity>
+                    <TouchableOpacity
                       style={[
-                        styles.cardTitle,
-                        { color: "#fff", fontWeight: "500" },
+                        styles.dropdownItem,
+                        {
+                          borderBottomLeftRadius: 10,
+                          borderBottomRightRadius: 10,
+                        },
                       ]}
+                      onPress={() => handleDelete(Number(id))}
                     >
-                      Delete
-                    </Text>
+                      <View
+                        style={[
+                          styles.cardIcon2,
+                          { backgroundColor: "#1f1f1f" },
+                        ]}
+                      >
+                        {isDeleteLoading ? (
+                          <ActivityIndicator size="small" color="#fff" />
+                        ) : (
+                          <TrashLinearIcon
+                            width={23}
+                            height={23}
+                            color="#fff"
+                          />
+                        )}
+                      </View>
+                      <View style={styles.cardContent}>
+                        <Text
+                          style={[
+                            styles.cardTitle,
+                            { color: "#fff", fontWeight: "500" },
+                          ]}
+                        >
+                          Delete
+                        </Text>
+                      </View>
+                    </TouchableOpacity>
                   </View>
-                </TouchableOpacity>
-              </View>
+                </View>
+              </TouchableWithoutFeedback>
             </View>
-          </TouchableWithoutFeedback>
-        </View>
-      )}
+          )}
 
-      <View
-        style={{
-          marginBottom: 20,
-          borderRadius: 10,
-          padding: 10,
-          flexDirection: "column",
-        }}
-      >
-        <TouchableOpacity onPress={toggleExpand}>
-          <Text
+          <View
             style={{
-              color: "#666",
-              lineHeight: 18,
-              letterSpacing: 0.4,
+              marginBottom: 20,
+              borderRadius: 10,
+              padding: 10,
+              flexDirection: "column",
             }}
-            numberOfLines={isExpanded ? undefined : 3}
-            ellipsizeMode="tail"
           >
-            {data.payload.find((item) => item.id === Number(id)).description}
-          </Text>
-        </TouchableOpacity>
-      </View>
-
-      <View style={styles.sectionCard}>
-        {data.payload
-          .find((item) => item.id === Number(id))
-          .exercises.map((item) => (
-            <TouchableOpacity
-              key={item.id}
-              style={styles.card3}
-              onPress={() => router.push(`/home/workout-exercises/${item.id}`)}
-            >
-              <View style={[styles.cardContent, { paddingVertical: 6 }]}>
-                <Text style={styles.cardTitle}>{item.exercise.name}</Text>
-
-                {item.main_note && (
-                  <Text style={styles.cardDescription}>{item.main_note}</Text>
-                )}
-              </View>
+            <TouchableOpacity onPress={toggleExpand}>
+              <Text
+                style={{
+                  color: "#666",
+                  lineHeight: 18,
+                  letterSpacing: 0.4,
+                }}
+                numberOfLines={isExpanded ? undefined : 3}
+                ellipsizeMode="tail"
+              >
+                {workout?.payload?.description}
+              </Text>
             </TouchableOpacity>
-          ))}
-      </View>
+          </View>
+
+          <View style={styles.sectionCard}>
+            {workout?.payload?.exercises.map((item) => (
+              <TouchableOpacity
+                key={item.id}
+                style={styles.card3}
+                onPress={() =>
+                  router.push(`/home/workout-exercises/${item.id}`)
+                }
+              >
+                <View style={[styles.cardContent, { paddingVertical: 6 }]}>
+                  <Text style={styles.cardTitle}>{item.exercise.name}</Text>
+
+                  {item.main_note && (
+                    <Text style={styles.cardDescription}>{item.main_note}</Text>
+                  )}
+                </View>
+              </TouchableOpacity>
+            ))}
+          </View>
+        </>
+      )}
     </ScrollView>
   );
 }

@@ -7,6 +7,8 @@ import {
   ScrollView,
   TextInput,
   ActivityIndicator,
+  Switch,
+  Platform,
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import CloseSquareIcon from "@/components/ui/icons/CloseSquareIcon";
@@ -25,6 +27,7 @@ export default function Page(): JSX.Element {
   const [workoutDescription, setWorkoutDescription] = useState("");
   const { isLoading, data } = useWorkouts();
   const { id } = useLocalSearchParams();
+  const [isPrivate, setIsPrivate] = useState(false);
 
   const { patchWorkout, isLoading: isPatchLoading } = usePatchWorkout();
 
@@ -34,6 +37,7 @@ export default function Page(): JSX.Element {
 
       setWorkoutName(workout.title);
       setWorkoutDescription(workout.description);
+      setIsPrivate(workout.is_private);
     }
   }, [isLoading, data]);
 
@@ -53,6 +57,7 @@ export default function Page(): JSX.Element {
       patchWorkout: {
         title: workoutName,
         description: workoutDescription,
+        is_private: isPrivate,
       },
     });
 
@@ -120,6 +125,30 @@ export default function Page(): JSX.Element {
             onChangeText={setWorkoutDescription}
             multiline={true}
           />
+
+          <View
+            style={{
+              flexDirection: "row",
+              alignItems: "center",
+              justifyContent: "space-between",
+              marginBottom: 18,
+              backgroundColor: "#efefef",
+              paddingHorizontal: 8,
+              paddingVertical: Platform.OS === "ios" ? 8 : 2,
+              borderRadius: 10,
+            }}
+          >
+            <Text
+              style={{
+                fontSize: 14,
+                fontWeight: "700",
+                marginBottom: 4,
+              }}
+            >
+              Is Private
+            </Text>
+            <Switch value={isPrivate} onValueChange={setIsPrivate} />
+          </View>
 
           <TouchableOpacity
             style={styles.continueButton}

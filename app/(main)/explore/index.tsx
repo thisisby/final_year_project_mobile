@@ -1,7 +1,8 @@
 import RowHorizontalIcon from "@/components/ui/icons/RowHorizontalIcon";
 import RowVerticalIcon from "@/components/ui/icons/RowVerticalIcon";
+import { useExploreWorkouts } from "@/hooks/useExploreWorkouts";
 import { router } from "expo-router";
-import React, { useState } from "react";
+import React, { useEffect, useState, useCallback, useRef } from "react";
 import {
   View,
   Text,
@@ -9,11 +10,145 @@ import {
   ScrollView,
   TouchableOpacity,
   TextInput,
+  ActivityIndicator,
+  Animated,
 } from "react-native";
 
 export default function Page() {
   const [activeCategory, setActiveCategory] = useState("All");
-  const [isMasonryView, setIsMasonryView] = useState(true); // Toggle between views
+  const [isMasonryView, setIsMasonryView] = useState(true);
+  const [columnOne, setColumnOne] = useState([]);
+  const [columnTwo, setColumnTwo] = useState([]);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [debouncedSearchQuery, setDebouncedSearchQuery] = useState("");
+  const [searchTimeout, setSearchTimeout] = useState(null);
+
+  // Animation references
+  const fadeAnim = useRef(new Animated.Value(1)).current;
+  const loaderFadeAnim = useRef(new Animated.Value(0)).current;
+  const isSearching = useRef(false);
+
+  const {
+    data: workouts,
+    isLoading,
+    fetchNextPage,
+    refetch,
+    isRefetching,
+  } = useExploreWorkouts(debouncedSearchQuery);
+
+  // Handle loader animation
+  useEffect(() => {
+    if (isLoading || isRefetching) {
+      // Fade in loader
+      Animated.timing(loaderFadeAnim, {
+        toValue: 1,
+        duration: 300,
+        useNativeDriver: true,
+      }).start();
+    } else {
+      // Fade out loader
+      Animated.timing(loaderFadeAnim, {
+        toValue: 0,
+        duration: 300,
+        useNativeDriver: true,
+      }).start();
+    }
+  }, [isLoading, isRefetching, loaderFadeAnim]);
+
+  // Reset columns when workouts data changes
+  useEffect(() => {
+    // Fade in when new results are available
+    if (isSearching.current) {
+      Animated.timing(fadeAnim, {
+        toValue: 1,
+        duration: 300,
+        useNativeDriver: true,
+      }).start(() => {
+        isSearching.current = false;
+      });
+    }
+
+    if (workouts && workouts.pages) {
+      const allWorkouts = workouts.pages.flatMap((page) => page.payload.data);
+      setColumnOne(allWorkouts.filter((_, index) => index % 2 === 0));
+      setColumnTwo(allWorkouts.filter((_, index) => index % 2 !== 0));
+    }
+  }, [workouts, fadeAnim]);
+
+  // Debounce the search query with 500ms delay and trigger fade animation
+  const handleSearchInputChange = useCallback(
+    (text) => {
+      setSearchQuery(text);
+
+      // Start fade out animation if this is a new search
+      if (!isSearching.current) {
+        isSearching.current = true;
+        Animated.timing(fadeAnim, {
+          toValue: 0.4,
+          duration: 200,
+          useNativeDriver: true,
+        }).start();
+      }
+
+      // Clear any existing timeout
+      if (searchTimeout) {
+        clearTimeout(searchTimeout);
+      }
+
+      // Set a new timeout for 500ms
+      const timeout = setTimeout(() => {
+        setDebouncedSearchQuery(text);
+      }, 500);
+
+      setSearchTimeout(timeout);
+    },
+    [searchTimeout, fadeAnim]
+  );
+
+  // Handle category selection with animation
+  const handleCategoryPress = useCallback(
+    (category) => {
+      setActiveCategory(category);
+
+      // Trigger fade out animation
+      if (!isSearching.current) {
+        isSearching.current = true;
+        Animated.timing(fadeAnim, {
+          toValue: 0.4,
+          duration: 200,
+          useNativeDriver: true,
+        }).start();
+      }
+
+      // If "All" is selected, clear the search
+      if (category === "All") {
+        setSearchQuery("");
+        setDebouncedSearchQuery("");
+        return;
+      }
+
+      // Otherwise, set the search query to the category name
+      const categorySearchText = category;
+      setSearchQuery(categorySearchText);
+
+      // Trigger search immediately for category selection
+      setDebouncedSearchQuery(categorySearchText);
+    },
+    [fadeAnim]
+  );
+
+  // Clean up the timeout when component unmounts
+  useEffect(() => {
+    return () => {
+      if (searchTimeout) {
+        clearTimeout(searchTimeout);
+      }
+    };
+  }, [searchTimeout]);
+
+  const handleLoadMore = () => {
+    fetchNextPage();
+  };
 
   const categories = [
     "All",
@@ -25,228 +160,131 @@ export default function Page() {
     "Legs",
   ];
 
-  // Fake data for workout list
-  const workouts = [
-    {
-      id: 1,
-      title: "Push-ups",
-      description:
-        "A basic upper body exercise to strengthen your chest, shoulders, and arms.",
-    },
-    {
-      id: 2,
-      title: "Squats",
-      description:
-        "Excellent for building leg strength and improving lower body endurance.",
-    },
-    {
-      id: 3,
-      title: "Deadlifts",
-      description:
-        "A powerful full-body movement that targets your back, legs, and core. Great for building overall strength.",
-    },
-    {
-      id: 4,
-      title: "Pull-ups",
-      description:
-        "Targets your lats and biceps. A challenging but effective upper body workout.",
-    },
-    {
-      id: 5,
-      title: "Plank",
-      description:
-        "A core stability exercise that strengthens your abs and lower back. Try holding for 60 seconds!",
-    },
-    {
-      id: 6,
-      title: "Burpees",
-      description:
-        "A high-intensity movement that works the entire body. Ideal for cardio and endurance training.",
-    },
-    {
-      id: 7,
-      title: "Lunges",
-      description:
-        "Works your quads, hamstrings, and glutes while improving balance and coordination.",
-    },
-    {
-      id: 8,
-      title: "Jump Rope",
-      description:
-        "An excellent cardio workout that improves footwork, endurance, and overall agility.",
-    },
-    {
-      id: 9,
-      title: "Bench Press",
-      description:
-        "One of the best exercises for chest and tricep strength. Focus on form and control.",
-    },
-    {
-      id: 10,
-      title: "Russian Twists",
-      description:
-        "A great core exercise to strengthen obliques and improve rotational strength.",
-    },
-    {
-      id: 11,
-      title: "Leg Raises",
-      description:
-        "Targets the lower abs and helps build core strength. Keep your movements controlled.",
-    },
-    {
-      id: 12,
-      title: "Dumbbell Shoulder Press",
-      description:
-        "Strengthens your shoulders and triceps. Keep your core engaged for stability.",
-    },
-    {
-      id: 13,
-      title: "Kettlebell Swings",
-      description:
-        "A dynamic movement that improves power and endurance. Focus on hip drive.",
-    },
-    {
-      id: 14,
-      title: "Mountain Climbers",
-      description:
-        "A great full-body workout that boosts cardiovascular endurance and core strength.",
-    },
-    {
-      id: 15,
-      title: "Seated Row",
-      description:
-        "A great back exercise that improves posture and strengthens pulling muscles.",
-    },
-    {
-      id: 16,
-      title: "Bicep Curls",
-      description:
-        "Targets your arms. Use proper form to avoid swinging the weights.",
-    },
-    {
-      id: 17,
-      title: "Triceps Dips",
-      description:
-        "A bodyweight movement that strengthens your triceps and shoulders.",
-    },
-    {
-      id: 18,
-      title: "Step-ups",
-      description:
-        "A great way to improve leg strength and coordination using a bench or step.",
-    },
-    {
-      id: 19,
-      title: "Treadmill Sprints",
-      description:
-        "Boost your cardiovascular fitness with high-intensity sprints.",
-    },
-    {
-      id: 20,
-      title: "Side Plank",
-      description:
-        "Strengthens your obliques and core while improving balance and stability.",
-    },
-    {
-      id: 21,
-      title: "Hip Thrusts",
-      description:
-        "One of the best exercises for glute activation and lower body strength.",
-    },
-    {
-      id: 22,
-      title: "Battle Ropes",
-      description:
-        "An intense conditioning workout that improves endurance and arm strength.",
-    },
-    {
-      id: 23,
-      title: "Box Jumps",
-      description:
-        "Improves explosiveness and leg power. Focus on landing softly.",
-    },
-    {
-      id: 24,
-      title: "Lat Pulldown",
-      description:
-        "Strengthens your upper back and helps improve pull-up performance.",
-    },
-    {
-      id: 25,
-      title: "Jump Squats",
-      description:
-        "A plyometric movement that builds leg strength and enhances speed.",
-    },
-    {
-      id: 26,
-      title: "Farmer’s Walk",
-      description:
-        "Builds grip strength and overall conditioning. Keep your core tight.",
-    },
-    {
-      id: 27,
-      title: "Calf Raises",
-      description: "Strengthens your lower legs and improves ankle stability.",
-    },
-    {
-      id: 28,
-      title: "Bent-over Rows",
-      description:
-        "A compound movement for building a strong back and improving posture.",
-    },
-    {
-      id: 29,
-      title: "Turkish Get-up",
-      description:
-        "A complex movement that improves stability, coordination, and total-body strength.",
-    },
-    {
-      id: 30,
-      title: "Jumping Jacks",
-      description:
-        "A classic warm-up exercise to get your heart rate up and body moving.",
-    },
-  ];
-  // Split workouts into two columns for masonry effect
-  const column1 = workouts.filter((_, index) => index % 2 === 0);
-  const column2 = workouts.filter((_, index) => index % 2 !== 0);
+  // Render the content for the data section
+  const renderContent = () => {
+    return (
+      <View style={{ position: "relative", minHeight: 300 }}>
+        {/* Custom animated loader that shows during initial load or refetching */}
+        <Animated.View
+          style={[
+            styles.customLoaderContainer,
+            {
+              opacity: loaderFadeAnim,
+              zIndex: isLoading || isRefetching ? 10 : -1,
+            },
+          ]}
+          pointerEvents={isLoading || isRefetching ? "auto" : "none"}
+        >
+          <View style={styles.customLoader}>
+            <ActivityIndicator size="small" color="#6371f6" />
+            <Text style={styles.loaderText}>
+              {isLoading ? "Loading workouts..." : "Updating results..."}
+            </Text>
+          </View>
+        </Animated.View>
+
+        <Animated.View style={[styles.masonryContainer, { opacity: fadeAnim }]}>
+          <View style={styles.masonryColumn}>
+            {columnOne.map((workout) => (
+              <TouchableOpacity
+                onPress={() => router.push(`/modal/copy-workout/${workout.id}`)}
+                key={workout.id}
+                style={styles.workoutItem}
+              >
+                <Text style={styles.workoutTitle}>{workout.title}</Text>
+                <View style={{ flexShrink: 1 }}>
+                  <Text
+                    style={styles.workoutDescription}
+                    numberOfLines={3}
+                    ellipsizeMode="tail"
+                  >
+                    {workout?.description || "No description available"}
+                  </Text>
+                </View>
+              </TouchableOpacity>
+            ))}
+          </View>
+
+          <View style={styles.masonryColumn}>
+            {columnTwo.map((workout) => (
+              <TouchableOpacity
+                onPress={() => router.push(`/modal/copy-workout/${workout.id}`)}
+                key={workout.id}
+                style={styles.workoutItem}
+              >
+                <Text style={styles.workoutTitle}>{workout.title}</Text>
+                <View style={{ flexShrink: 1 }}>
+                  <Text
+                    style={styles.workoutDescription}
+                    numberOfLines={3}
+                    ellipsizeMode="tail"
+                  >
+                    {workout?.description || "No description available"}
+                  </Text>
+                </View>
+              </TouchableOpacity>
+            ))}
+          </View>
+
+          {/* No results message */}
+          {workouts &&
+            workouts.pages &&
+            workouts.pages[0]?.payload?.data?.length === 0 && (
+              <View style={styles.noResultsContainer}>
+                <Text style={styles.noResultsText}>No workouts found</Text>
+              </View>
+            )}
+        </Animated.View>
+      </View>
+    );
+  };
 
   return (
     <ScrollView
       contentContainerStyle={styles.scrollContainer}
       style={styles.container}
+      onScroll={({ nativeEvent }) => {
+        if (isCloseToBottom(nativeEvent)) {
+          handleLoadMore();
+        }
+      }}
+      scrollEventThrottle={400}
     >
       <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
         <Text style={styles.title}>Explore</Text>
-        <View
-          style={{
-            flexDirection: "row",
-            justifyContent: "flex-end",
-            gap: 10,
-            paddingRight: 4,
-          }}
-        >
+      </View>
+
+      {/* Search Input */}
+      <View style={styles.searchContainer}>
+        <TextInput
+          placeholder="Search: e.g. Push-ups, Squats, etc."
+          placeholderTextColor="#999999"
+          style={styles.searchInput}
+          value={searchQuery}
+          onChangeText={handleSearchInputChange}
+        />
+        {searchQuery.length > 0 && (
           <TouchableOpacity
-            disabled={!isMasonryView}
-            onPress={() => setIsMasonryView((prev) => !prev)}
+            style={styles.clearButton}
+            onPress={() => {
+              // Trigger fade out animation
+              if (!isSearching.current) {
+                isSearching.current = true;
+                Animated.timing(fadeAnim, {
+                  toValue: 0.4,
+                  duration: 200,
+                  useNativeDriver: true,
+                }).start();
+              }
+
+              setSearchQuery("");
+              setDebouncedSearchQuery("");
+              setActiveCategory("All");
+            }}
           >
-            <RowVerticalIcon
-              width={24}
-              height={24}
-              color={isMasonryView ? "#69787b" : "#1f1f1f"}
-            />
+            <Text style={styles.clearButtonText}>✕</Text>
           </TouchableOpacity>
-          <TouchableOpacity
-            disabled={isMasonryView}
-            onPress={() => setIsMasonryView((prev) => !prev)}
-          >
-            <RowHorizontalIcon
-              width={24}
-              height={24}
-              color={isMasonryView ? "#1f1f1f" : "#69787b"}
-            />
-          </TouchableOpacity>
-        </View>
+        )}
       </View>
 
       {/* Horizontal Scroll for Categories */}
@@ -262,7 +300,7 @@ export default function Page() {
               styles.categoryItem,
               activeCategory === category && styles.activeCategory,
             ]}
-            onPress={() => setActiveCategory(category)}
+            onPress={() => handleCategoryPress(category)}
           >
             <Text
               style={[
@@ -276,69 +314,21 @@ export default function Page() {
         ))}
       </ScrollView>
 
-      {/* Search Input */}
-      <TextInput
-        placeholder="Search: e.g. Push-ups, Squats, etc."
-        placeholderTextColor="#999999"
-        style={styles.searchInput}
-      />
-
-      {/* Conditional Rendering Based on View Mode */}
-      {isMasonryView ? (
-        // Masonry Layout
-        <View style={styles.masonryContainer}>
-          <View style={styles.masonryColumn}>
-            {column1.map((workout) => (
-              <TouchableOpacity
-                onPress={() => router.push(`/modal/copy-workout/${workout.id}`)}
-                key={workout.id}
-                style={styles.workoutItem}
-              >
-                <Text style={styles.workoutTitle}>{workout.title}</Text>
-                <Text style={styles.workoutDescription}>
-                  {workout.description}
-                </Text>
-              </TouchableOpacity>
-            ))}
-          </View>
-
-          <View style={styles.masonryColumn}>
-            {column2.map((workout) => (
-              <TouchableOpacity
-                onPress={() => router.push(`/modal/copy-workout/${workout.id}`)}
-                key={workout.id}
-                style={styles.workoutItem}
-              >
-                <Text style={styles.workoutTitle}>{workout.title}</Text>
-                <Text style={styles.workoutDescription}>
-                  {workout.description}
-                </Text>
-              </TouchableOpacity>
-            ))}
-          </View>
-        </View>
-      ) : (
-        // List View
-        <View style={styles.listContainer}>
-          {workouts.map((workout) => (
-            <TouchableOpacity
-              onPress={() => router.push(`/modal/copy-workout/${workout.id}`)}
-              key={workout.id}
-              style={styles.listItem}
-            >
-              <Text style={styles.workoutTitle}>{workout.title}</Text>
-              <Text style={styles.workoutDescription}>
-                {workout.description}
-              </Text>
-            </TouchableOpacity>
-          ))}
-        </View>
-      )}
+      {/* Render content section with proper loading states */}
+      {renderContent()}
     </ScrollView>
   );
 }
 
-// Styles
+const isCloseToBottom = ({ layoutMeasurement, contentOffset, contentSize }) => {
+  const paddingToBottom = 20;
+  return (
+    layoutMeasurement.height + contentOffset.y >=
+    contentSize.height - paddingToBottom
+  );
+};
+
+// Updated styles
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -352,6 +342,29 @@ const styles = StyleSheet.create({
     fontWeight: "800",
     fontSize: 20,
     marginBottom: 20,
+  },
+  searchContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 12,
+    position: "relative",
+  },
+  searchInput: {
+    flex: 1,
+    backgroundColor: "#F6F6F6",
+    padding: 14,
+    borderRadius: 8,
+    paddingRight: 40, // Space for the clear button
+  },
+  clearButton: {
+    position: "absolute",
+    right: 10,
+    padding: 8,
+  },
+  clearButtonText: {
+    fontSize: 16,
+    color: "#999",
+    fontWeight: "bold",
   },
   categoryContainer: {
     flexDirection: "row",
@@ -369,6 +382,7 @@ const styles = StyleSheet.create({
   },
   activeCategory: {
     borderColor: "#333",
+    backgroundColor: "#f4f4f4",
   },
   categoryText: {
     fontSize: 14,
@@ -378,30 +392,56 @@ const styles = StyleSheet.create({
   activeCategoryText: {
     color: "#1f1f1f",
   },
-  searchInput: {
-    width: "100%",
-    backgroundColor: "#F6F6F6",
-    padding: 14,
-    borderRadius: 8,
-    marginBottom: 12,
-  },
-  toggleButton: {
-    backgroundColor: "#333",
-    paddingVertical: 10,
-    paddingHorizontal: 15,
-    borderRadius: 8,
+  customLoaderContainer: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    height: 100,
+    justifyContent: "center",
     alignItems: "center",
-    marginBottom: 12,
+    backgroundColor: "rgba(255, 255, 255, 0.8)",
+    zIndex: 10,
+    borderRadius: 12,
   },
-  toggleButtonText: {
-    color: "#fff",
+  customLoader: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "white",
+    paddingVertical: 12,
+    paddingHorizontal: 20,
+    borderRadius: 50,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  loaderText: {
+    marginLeft: 10,
     fontSize: 14,
-    fontWeight: "600",
+    fontWeight: "500",
+    color: "#333",
+  },
+  noResultsContainer: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    height: 200,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  noResultsText: {
+    fontSize: 16,
+    color: "#666",
   },
   // Masonry View Styles
   masonryContainer: {
     flexDirection: "row",
     justifyContent: "space-between",
+    position: "relative",
+    minHeight: 300,
   },
   masonryColumn: {
     width: "48%",
@@ -420,15 +460,5 @@ const styles = StyleSheet.create({
   workoutDescription: {
     color: "#898989",
     fontSize: 12,
-  },
-  // List View Styles
-  listContainer: {
-    marginTop: 10,
-  },
-  listItem: {
-    backgroundColor: "#f4f6f6",
-    borderRadius: 8,
-    padding: 12,
-    marginBottom: 10,
   },
 });

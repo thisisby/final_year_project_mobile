@@ -30,6 +30,7 @@ export type CustomExercise = {
 export type CreateWorkoutRequest = {
   title: string;
   description?: string;
+  is_private?: boolean;
   workoutExercises: number[];
 };
 export const getWorkouts = async (userID: number): Promise<Workout[]> => {
@@ -67,6 +68,7 @@ interface PatchWorkoutParams {
 export type PatchWorkout = {
   title?: string;
   description?: string;
+  is_private?: boolean;
 };
 export const patchWorkout = async ({
   id,
@@ -76,3 +78,15 @@ export const patchWorkout = async ({
 
   return response.data;
 };
+
+export const getWorkoutByID = async (id: number) => {
+  const response = await api.get(`/workouts/${id}`);
+  return response.data;
+};
+
+
+export const copyWorkout = async (workoutID: number) => {
+  const response = await api.get(`/workouts/${workoutID}/copy`);
+  return response.data;
+};
+

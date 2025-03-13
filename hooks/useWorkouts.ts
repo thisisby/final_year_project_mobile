@@ -2,8 +2,10 @@ import { queryClient } from "@/app/_layout";
 import {
   createWorkout,
   deleteWorkout,
+  getWorkoutByID,
   getWorkouts,
   patchWorkout,
+  copyWorkout,
 } from "@/services/workoutsService";
 import { useUserStore } from "@/store/userStore";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -71,3 +73,34 @@ export function usePatchWorkout() {
     isLoading: mutation.isLoading,
   };
 }
+
+export function useCopyWorkout() {
+  const mutation = useMutation(copyWorkout, {
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: ["workouts"] });
+      console.log("workout copied", data);
+    },
+    onError: (error) => {
+      console.error("workout copy error", error);
+    },
+  });
+
+  return {
+    copyWorkout: mutation.mutateAsync,
+    isLoading: mutation.isLoading,
+  };
+}
+
+export function useGetWorkoutByID(id: number) {
+  return useQuery({
+    queryKey: ["explore-workout-by-id", id],
+    queryFn: () => getWorkoutByID(id),
+    onSuccess: (data) => {
+      console.log("explore workout by id", data);
+    },
+    onError: (error) => {
+      console.error("explore workout by id error", error);
+    },
+  });
+}
+
