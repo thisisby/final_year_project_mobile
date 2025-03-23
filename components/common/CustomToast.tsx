@@ -30,6 +30,25 @@ const toastConfig = {
       {text2 && <Text style={{ color: "white" }}>{text2}</Text>}
     </View>
   ),
+  success: ({ text1, text2 }: CustomToastProps) => (
+    <View
+      style={{
+        position: "absolute",
+        top: 0,
+        left: 20,
+        right: 20,
+        backgroundColor: "#1f1f1f",
+        paddingHorizontal: 8,
+        paddingVertical: 4,
+        borderRadius: 7,
+      }}
+    >
+      {text1 && (
+        <Text style={{ color: "#fff", fontWeight: "bold" }}>{text1}</Text>
+      )}
+      {text2 && <Text style={{ color: "white" }}>{text2}</Text>}
+    </View>
+  ),
 };
 
 export default toastConfig;

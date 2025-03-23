@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useMemo } from "react";
 import {
   View,
   Text,
@@ -20,6 +20,7 @@ import ArrowSquareLeftIcon from "@/components/ui/icons/ArrowSquareLeftIcon";
 import SettingLinearIcon from "@/components/ui/icons/SettingLinearIcon";
 import TimerLinearIcon from "@/components/ui/icons/TimerLinearIcon";
 import BubbleLinearIcon from "@/components/ui/icons/BubbleLinearIcon";
+import { useGetNutritions } from "@/hooks/useNutritions";
 
 const categories = [
   "All",
@@ -31,52 +32,48 @@ const categories = [
   "Meditation",
 ];
 
-interface Session {
+interface Nutrition {
   id: string;
-  title: string;
-  mass: string;
-  date: string;
+  name: string;
+  value: string;
+  created_at: string;
 }
 
 export default function Page(): JSX.Element {
   const navigation = useNavigation();
   const [activeCategory, setActiveCategory] = useState("All");
   const router = useRouter();
-  const [isDelete, setIsDelete] = React.useState(false);
-  const sessions: Session[] = [
-    {
-      id: "1",
-      title: "Protein Shake",
-      mass: "2.5 g",
-      date: "December 2024",
-    },
-    {
-      id: "2",
-      title: "Creatine",
-      mass: "5 g",
-      date: "December 2024",
-    },
-    {
-      id: "3",
-      title: "Protein Shake",
-      mass: "2.5 g",
-      date: "November 2024",
-    },
-    {
-      id: "4",
-      title: "Creatine",
-      mass: "5 g",
-      date: "November 2024",
-    },
-  ];
+  const { nutritions, isLoading } = useGetNutritions();
 
-  const groupedSessions = sessions.reduce((acc, session) => {
-    if (!acc[session.date]) {
-      acc[session.date] = [];
-    }
-    acc[session.date].push(session);
-    return acc;
-  }, {} as Record<string, Session[]>);
+  const formatDate = (dateString: string) => {
+    const date = new Date(dateString);
+    return date.toLocaleDateString("en-US", {
+      month: "short",
+      day: "numeric",
+      year: "numeric",
+    });
+  };
+
+  const groupedNutritions = useMemo(() => {
+    if (!nutritions || nutritions.length === 0) return {};
+
+    const sortedNutritions = [...nutritions].sort(
+      (a, b) =>
+        new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+    );
+
+    return sortedNutritions.reduce((acc, nutrition) => {
+      const dateKey = formatDate(nutrition.created_at);
+
+      if (!acc[dateKey]) {
+        acc[dateKey] = [];
+      }
+
+      acc[dateKey].push(nutrition);
+      return acc;
+    }, {} as Record<string, Nutrition[]>);
+  }, [nutritions]);
+
   return (
     <ScrollView
       contentContainerStyle={{
@@ -99,54 +96,62 @@ export default function Page(): JSX.Element {
         </View>
       </View>
 
-      {Object.entries(groupedSessions).map(([date, sessions]) => (
-        <View key={date}>
-          <Text
-            style={{
-              fontSize: 14,
-              fontWeight: "bold",
-              marginVertical: 10,
-              color: "#1f1f1f",
-            }}
-          >
-            {date}
-          </Text>
-          {sessions.map((session) => (
-            <TouchableOpacity
-              key={session.id}
-              style={{
-                paddingVertical: 8,
-                paddingHorizontal: 10,
-                borderRadius: 8,
-                borderWidth: 1,
-                borderColor: "#efefef",
-                display: "flex",
-                flexDirection: "row",
-                gap: 10,
-                alignItems: "center",
-                marginBottom: 8,
-              }}
-              onPress={() => router.push(`/home/nutritions/${session.id}`)}
-            >
-              <View
-                style={{
-                  padding: 4,
-                  borderRadius: 6,
-                  backgroundColor: "#f1f1f1",
-                }}
-              >
-                <BubbleLinearIcon width={24} height={24} />
-              </View>
-              <View>
-                <Text style={styles.cardTitle}>{session.title}</Text>
-                <Text style={{ fontSize: 12, color: "#666", marginTop: 2 }}>
-                  {session.mass}
-                </Text>
-              </View>
-            </TouchableOpacity>
-          ))}
+      {isLoading ? (
+        <Text style={styles.loadingText}>Loading nutritions...</Text>
+      ) : Object.keys(groupedNutritions).length === 0 ? (
+        <View style={styles.noRecordsContainer}>
+          <Text style={styles.noRecordsText}>You have no nutritions yet</Text>
         </View>
-      ))}
+      ) : (
+        Object.entries(groupedNutritions).map(([date, nutritions]) => (
+          <View key={date}>
+            <Text
+              style={{
+                fontSize: 14,
+                fontWeight: "bold",
+                marginVertical: 10,
+                color: "#1f1f1f",
+              }}
+            >
+              {date}
+            </Text>
+            {nutritions.map((nutrition) => (
+              <TouchableOpacity
+                key={nutrition.id}
+                style={{
+                  paddingVertical: 8,
+                  paddingHorizontal: 10,
+                  borderRadius: 8,
+                  borderWidth: 1,
+                  borderColor: "#efefef",
+                  display: "flex",
+                  flexDirection: "row",
+                  gap: 10,
+                  alignItems: "center",
+                  marginBottom: 8,
+                }}
+                onPress={() => router.push(`/home/nutritions/${nutrition.id}`)}
+              >
+                <View
+                  style={{
+                    padding: 4,
+                    borderRadius: 6,
+                    backgroundColor: "#f1f1f1",
+                  }}
+                >
+                  <BubbleLinearIcon width={24} height={24} />
+                </View>
+                <View>
+                  <Text style={styles.cardTitle}>{nutrition.name}</Text>
+                  <Text style={{ fontSize: 12, color: "#666", marginTop: 2 }}>
+                    {nutrition.value}
+                  </Text>
+                </View>
+              </TouchableOpacity>
+            ))}
+          </View>
+        ))
+      )}
     </ScrollView>
   );
 }
@@ -217,4 +222,14 @@ const styles = StyleSheet.create({
   },
 
   cardTitle: { fontSize: 14, fontWeight: "bold" },
+  noRecordsContainer: {
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: "#e7eded",
+    borderStyle: "dashed",
+    padding: 10,
+    paddingVertical: 20,
+    marginTop: 20,
+  },
+  noRecordsText: { textAlign: "center" },
 });

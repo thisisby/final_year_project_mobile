@@ -23,6 +23,8 @@ import { useUserStore } from "@/store/userStore";
 import WorkoutIcon from "@/components/ui/icons/WorkoutIcon";
 import NutritionIcon from "@/components/ui/icons/NutritionIcon";
 import { useWorkouts } from "@/hooks/useWorkouts";
+import { useSessionStore } from "@/store/sessionStore";
+import { useGetSessions } from "@/hooks/useSessions";
 
 export default function Page() {
   const { user } = useUserStore();
@@ -32,8 +34,9 @@ export default function Page() {
   }
 
   const { isLoading, data } = useWorkouts();
+  const { sessions, isLoading: isLoadingSessions } = useGetSessions();
 
-  if (isLoading) {
+  if (isLoading || isLoadingSessions) {
     return (
       <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
         <ActivityIndicator size="large" color="#0000ff" />
@@ -131,7 +134,7 @@ export default function Page() {
               <View>
                 <Text style={styles.cardTitle}>Sessions</Text>
                 <Text style={{ color: "#898989", fontSize: 12 }}>
-                  0 sessions today
+                  {sessions?.length} sessions saved
                 </Text>
               </View>
             </TouchableOpacity>

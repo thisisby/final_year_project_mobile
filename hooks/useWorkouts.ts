@@ -78,6 +78,7 @@ export function useCopyWorkout() {
   const mutation = useMutation(copyWorkout, {
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ["workouts"] });
+      queryClient.invalidateQueries({ queryKey: ["explore-workout-by-id"] });
       console.log("workout copied", data);
     },
     onError: (error) => {

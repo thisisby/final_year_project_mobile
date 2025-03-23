@@ -6,6 +6,7 @@ import {
   StyleSheet,
   ScrollView,
   TextInput,
+  ActivityIndicator,
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import CloseSquareIcon from "@/components/ui/icons/CloseSquareIcon";
@@ -15,40 +16,31 @@ import TickSquareBoldIcon from "@/components/ui/icons/TickSquareBoldIcon";
 import ArrowSquareLeftIcon from "@/components/ui/icons/ArrowSquareLeftIcon";
 import AddIcon from "@/components/ui/icons/AddIcon";
 import AddSquareLinearIcon from "@/components/ui/icons/AddSquareLinearIcon";
-import RecordCircleBoldIcon from "@/components/ui/icons/RecordCircleBoldIcon";
-import RecordCircleLinearIcon from "@/components/ui/icons/RecordCircleLinearIcon";
-import { useActivities } from "@/hooks/useActivities";
-import { useGetSessionByID, useUpdateSession } from "@/hooks/useSessions";
-
-interface ExerciseListItem {
-  id: string;
-  title: string;
-  count: number;
-}
+import { useCreateNutrition } from "@/hooks/useNutritions";
 
 export default function Page(): JSX.Element {
   const navigation = useNavigation();
-  const { id } = useLocalSearchParams();
+  const [search, setSearch] = useState("");
+  const [newExercise, setNewExercise] = useState(false);
+  const [selectedExercises, setSelectedExercises] = useState<string[]>([]);
+  const [stage, setStage] = useState(1); // 1: Initial stage, 2: Search and exercise selection
+  const [workoutName, setWorkoutName] = useState("");
+  const [workoutDescription, setWorkoutDescription] = useState("");
 
-  const { data: activities } = useActivities();
-  const { session, isLoading: isLoadingSession } = useGetSessionByID(
-    Number(id)
-  );
-  const { updateSession, isLoading: isLoadingUpdateSession } = useUpdateSession(
-    Number(id)
-  );
+  const [name, setName] = useState("");
+  const [value, setValue] = useState("");
 
-  const handleUpdateSession = async (activityId: number) => {
-    await updateSession({
-      id: Number(id),
-      patchSession: { activity_id: activityId },
+  const { createNutrition, isLoading: isLoadingCreateNutrition } =
+    useCreateNutrition();
+
+  const handleContinue = async () => {
+    await createNutrition({
+      name,
+      value,
     });
+    navigation.goBack();
   };
 
-  console.log(activities);
-  console.log(session);
-
-  const handleAddCustomExercise = () => {};
   return (
     <View style={styles.container}>
       <ScrollView
@@ -62,31 +54,57 @@ export default function Page(): JSX.Element {
           </TouchableOpacity>
 
           <View>
-            <Text style={styles.headerHeading}>Session Types</Text>
+            <Text style={styles.headerHeading}>Create Nutrition</Text>
           </View>
         </View>
 
         <View>
-          <View style={styles.sectionCard}>
-            {activities?.payload.map((item) => (
-              <TouchableOpacity
-                key={item.id}
-                style={styles.card3}
-                onPress={() => {
-                  handleUpdateSession(item.id);
-                }}
-              >
-                <View style={styles.cardContent}>
-                  {session?.payload.activity_id === item.id ? (
-                    <RecordCircleBoldIcon width={26} height={26} />
-                  ) : (
-                    <RecordCircleLinearIcon width={26} height={26} />
-                  )}
-                  <Text style={styles.cardTitle}>{item.name}</Text>
-                </View>
-              </TouchableOpacity>
-            ))}
-          </View>
+          <Text
+            style={{
+              fontSize: 14,
+              fontWeight: "700",
+              marginBottom: 4,
+            }}
+          >
+            Name
+          </Text>
+          <TextInput
+            style={[styles.input, { marginBottom: 18 }]}
+            placeholder="Avarage Intensity, Heart Rate, etc."
+            placeholderTextColor="#999999"
+            value={name}
+            onChangeText={setName}
+            multiline={true}
+          />
+
+          <Text
+            style={{
+              fontSize: 14,
+              fontWeight: "700",
+              marginBottom: 4,
+            }}
+          >
+            Value
+          </Text>
+          <TextInput
+            style={[styles.input, { marginBottom: 18 }]}
+            placeholder="Enter value"
+            placeholderTextColor="#999999"
+            value={value}
+            onChangeText={setValue}
+            multiline={true}
+          />
+
+          <TouchableOpacity
+            style={styles.continueButton}
+            onPress={handleContinue}
+          >
+            {isLoadingCreateNutrition ? (
+              <ActivityIndicator size="small" color="#fff" />
+            ) : (
+              <Text style={styles.continueText}>Save</Text>
+            )}
+          </TouchableOpacity>
         </View>
       </ScrollView>
     </View>
@@ -147,7 +165,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#f8f9f9",
     borderRadius: 10,
     marginBottom: 3,
-    paddingVertical: 10,
+    paddingVertical: 8,
     paddingHorizontal: 6,
   },
   cardContent: {

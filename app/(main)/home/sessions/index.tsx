@@ -1,24 +1,18 @@
-import React, { useState } from "react";
+import React, { useState, useMemo } from "react";
 import {
   View,
   Text,
-  FlatList,
   TouchableOpacity,
   StyleSheet,
   ScrollView,
 } from "react-native";
-import { Ionicons } from "@expo/vector-icons";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useNavigation, useRouter } from "expo-router";
-import MagicPenIcon from "@/components/ui/icons/MagicPenIcon";
-import ChartIcon from "@/components/ui/icons/ChartIcon";
-import NutritionIcon from "@/components/ui/icons/NutritionIcon";
-import WorkoutIcon from "@/components/ui/icons/WorkoutIcon";
-import NoteIcon from "@/components/ui/icons/NoteIcon";
-import Avatar from "@/components/ui/Avatar";
 import ArrowSquareLeftIcon from "@/components/ui/icons/ArrowSquareLeftIcon";
 import SettingLinearIcon from "@/components/ui/icons/SettingLinearIcon";
 import TimerLinearIcon from "@/components/ui/icons/TimerLinearIcon";
+import { useGetSessions } from "@/hooks/useSessions";
+import { useActivities } from "@/hooks/useActivities";
 
 const categories = [
   "All",
@@ -30,52 +24,103 @@ const categories = [
   "Meditation",
 ];
 
+interface Activity {
+  id: number;
+  name: string;
+  activity_group_id: number;
+}
+
 interface Session {
-  id: string;
-  title: string;
-  duration: string;
-  date: string;
+  id: number;
+  notes: string;
+  start_time: string;
+  end_time: string;
+  activity_id: number;
+  activity: Activity;
 }
 
 export default function Page(): JSX.Element {
   const navigation = useNavigation();
   const [activeCategory, setActiveCategory] = useState("All");
   const router = useRouter();
-  const [isDelete, setIsDelete] = React.useState(false);
-  const sessions: Session[] = [
-    {
-      id: "1",
-      title: "Strength Training",
-      duration: "10 mins",
-      date: "December 2024",
-    },
-    {
-      id: "2",
-      title: "Cardio",
-      duration: "20 mins",
-      date: "December 2024",
-    },
-    {
-      id: "3",
-      title: "Yoga",
-      duration: "30 mins",
-      date: "November 2024",
-    },
-    {
-      id: "4",
-      title: "Pilates",
-      duration: "15 mins",
-      date: "November 2024",
-    },
-  ];
+  const { sessions, isLoading: isLoadingSessions } = useGetSessions();
 
-  const groupedSessions = sessions.reduce((acc, session) => {
-    if (!acc[session.date]) {
-      acc[session.date] = [];
+  // Format date for display and grouping
+  const formatDate = (dateString: string) => {
+    const date = new Date(dateString);
+    return date.toLocaleDateString("en-US", {
+      month: "short",
+      day: "numeric",
+      year: "numeric",
+    });
+  };
+
+  // Calculate duration between start and end times
+  const calculateDuration = (startTime: string, endTime: string) => {
+    const start = new Date(startTime);
+    const end = new Date(endTime);
+    const durationMs = end.getTime() - start.getTime();
+
+    // Convert to hours, minutes, seconds
+    const seconds = Math.floor((durationMs / 1000) % 60);
+    const minutes = Math.floor((durationMs / (1000 * 60)) % 60);
+    const hours = Math.floor(durationMs / (1000 * 60 * 60));
+
+    if (hours > 0) {
+      return `${hours}h ${minutes}m`;
+    } else if (minutes > 0) {
+      return `${minutes}m ${seconds}s`;
+    } else {
+      return `${seconds}s`;
     }
-    acc[session.date].push(session);
-    return acc;
-  }, {} as Record<string, Session[]>);
+  };
+
+  // Group sessions by date and process for display, with filtering by category
+  const groupedSessions = useMemo(() => {
+    if (!sessions || sessions.length === 0) return {};
+
+    // First filter sessions based on activeCategory
+    const filteredSessions =
+      activeCategory === "All"
+        ? sessions
+        : sessions.filter(
+            (session) => session.activity.name === activeCategory
+          );
+
+    // Then sort sessions by start_time (newest first)
+    const sortedSessions = [...filteredSessions].sort(
+      (a, b) =>
+        new Date(b.start_time).getTime() - new Date(a.start_time).getTime()
+    );
+
+    // Then group by formatted date
+    return sortedSessions.reduce((acc, session) => {
+      const dateKey = formatDate(session.start_time);
+
+      if (!acc[dateKey]) {
+        acc[dateKey] = [];
+      }
+
+      // Add processed session with formatted data
+      acc[dateKey].push({
+        id: session.id,
+        title: session.activity.name,
+        notes: session.notes,
+        duration: calculateDuration(session.start_time, session.end_time),
+        date: dateKey,
+        rawData: session, // Keep original data for reference if needed
+      });
+
+      return acc;
+    }, {} as Record<string, any[]>);
+  }, [sessions, activeCategory]); // Added activeCategory as a dependency
+
+  const { data: activities, isLoading: isLoadingActivities } = useActivities();
+
+  const handleSetActiveCategory = (activityName: string) => {
+    setActiveCategory(activityName);
+  };
+
   return (
     <ScrollView
       contentContainerStyle={{
@@ -103,75 +148,73 @@ export default function Page(): JSX.Element {
         showsHorizontalScrollIndicator={false}
         style={styles.categoryContainer}
       >
-        {categories.map((category) => (
+        <TouchableOpacity
+          key="All"
+          style={[
+            styles.categoryItem,
+            activeCategory === "All" && styles.activeCategory,
+          ]}
+          onPress={() => handleSetActiveCategory("All")}
+        >
+          <Text
+            style={[
+              styles.categoryText,
+              activeCategory === "All" && styles.activeCategoryText,
+            ]}
+          >
+            All
+          </Text>
+        </TouchableOpacity>
+
+        {activities?.payload.map((activity) => (
           <TouchableOpacity
-            key={category}
+            key={activity.id}
             style={[
               styles.categoryItem,
-              activeCategory === category && styles.activeCategory,
+              activeCategory === activity.name && styles.activeCategory,
             ]}
-            onPress={() => setActiveCategory(category)}
+            onPress={() => handleSetActiveCategory(activity.name)}
           >
             <Text
               style={[
                 styles.categoryText,
-                activeCategory === category && styles.activeCategoryText,
+                activeCategory === activity.name && styles.activeCategoryText,
               ]}
             >
-              {category}
+              {activity.name}
             </Text>
           </TouchableOpacity>
         ))}
       </ScrollView>
 
-      {Object.entries(groupedSessions).map(([date, sessions]) => (
-        <View key={date}>
-          <Text
-            style={{
-              fontSize: 14,
-              fontWeight: "bold",
-              marginVertical: 10,
-              color: "#1f1f1f",
-            }}
-          >
-            {date}
-          </Text>
-          {sessions.map((session) => (
-            <TouchableOpacity
-              key={session.id}
-              style={{
-                paddingVertical: 8,
-                paddingHorizontal: 10,
-                borderRadius: 8,
-                borderWidth: 1,
-                borderColor: "#efefef",
-                display: "flex",
-                flexDirection: "row",
-                gap: 10,
-                alignItems: "center",
-                marginBottom: 8,
-              }}
-              onPress={() => router.push(`/home/sessions/${session.id}`)}
-            >
-              <View
-                style={{
-                  padding: 4,
-                  borderRadius: 6,
-                  backgroundColor: "#f1f1f1",
-                }}
-              >
-                <TimerLinearIcon width={24} height={24} />
-              </View>
-              <View>
-                <Text style={styles.cardTitle}>{session.title}</Text>
-                <Text style={{ fontSize: 12, color: "#666", marginTop: 2 }}>
-                  {session.duration}
-                </Text>
-              </View>
-            </TouchableOpacity>
-          ))}
+      {isLoadingSessions ? (
+        <Text style={styles.loadingText}>Loading sessions...</Text>
+      ) : Object.keys(groupedSessions).length === 0 ? (
+        <View style={styles.noRecordsContainer}>
+          <Text style={styles.noRecordsText}>You have no sessions yet</Text>
         </View>
-      ))}
+      ) : (
+        Object.entries(groupedSessions).map(([date, dateSessions]) => (
+          <View key={date} style={styles.dateGroup}>
+            <Text style={styles.dateHeader}>{date}</Text>
+            {dateSessions.map((session) => (
+              <TouchableOpacity
+                key={session.id}
+                style={styles.sessionCard}
+                onPress={() => router.push(`/home/sessions/${session.id}`)}
+              >
+                <View style={styles.iconContainer}>
+                  <TimerLinearIcon width={24} height={24} />
+                </View>
+                <View style={styles.sessionInfo}>
+                  <Text style={styles.cardTitle}>{session.title}</Text>
+                  <Text style={styles.durationText}>{session.duration}</Text>
+                </View>
+              </TouchableOpacity>
+            ))}
+          </View>
+        ))
+      )}
     </ScrollView>
   );
 }
@@ -181,8 +224,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     flex: 1,
   },
-
-  // Sticky Header
   header: {
     height: 60,
     flexDirection: "row",
@@ -192,19 +233,11 @@ const styles = StyleSheet.create({
     marginBottom: 10,
     marginTop: 10,
   },
-  headerTitle: { fontSize: 18, fontWeight: "bold" },
-
   headerHeading: {
-    fontWeight: 700,
+    fontWeight: "700",
     fontSize: 16,
     textAlign: "center",
   },
-  headerName: {
-    color: "#898989",
-    textAlign: "center",
-    fontSize: 12,
-  },
-
   categoryContainer: {
     flexDirection: "row",
     marginBottom: 16,
@@ -230,16 +263,69 @@ const styles = StyleSheet.create({
   activeCategoryText: {
     color: "#1f1f1f",
   },
-
-  card3: {
-    paddingVertical: 4,
+  dateGroup: {
+    marginBottom: 16,
+  },
+  dateHeader: {
+    fontSize: 14,
+    fontWeight: "bold",
+    marginVertical: 10,
+    color: "#1f1f1f",
+  },
+  sessionCard: {
+    paddingVertical: 8,
     paddingHorizontal: 10,
     borderRadius: 8,
-    justifyContent: "center",
-    alignItems: "center",
     borderWidth: 1,
     borderColor: "#efefef",
+    display: "flex",
+    flexDirection: "row",
+    gap: 10,
+    alignItems: "center",
+    marginBottom: 8,
   },
-
-  cardTitle: { fontSize: 14, fontWeight: "bold" },
+  iconContainer: {
+    padding: 4,
+    borderRadius: 6,
+    backgroundColor: "#f1f1f1",
+  },
+  sessionInfo: {
+    flex: 1,
+  },
+  cardTitle: {
+    fontSize: 14,
+    fontWeight: "bold",
+    color: "#1f1f1f",
+  },
+  durationText: {
+    fontSize: 12,
+    color: "#666",
+    marginTop: 2,
+  },
+  notesText: {
+    fontSize: 12,
+    color: "#888",
+    marginTop: 4,
+    fontStyle: "italic",
+  },
+  loadingText: {
+    textAlign: "center",
+    marginTop: 20,
+    color: "#666",
+  },
+  emptyText: {
+    textAlign: "center",
+    marginTop: 40,
+    color: "#666",
+  },
+  noRecordsContainer: {
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: "#e7eded",
+    borderStyle: "dashed",
+    padding: 10,
+    paddingVertical: 20,
+    marginTop: 20,
+  },
+  noRecordsText: { textAlign: "center" },
 });

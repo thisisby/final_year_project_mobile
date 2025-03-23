@@ -1,8 +1,10 @@
 import Heading from "@/components/ui/Heading";
 import ArrowSquareLeftIcon from "@/components/ui/icons/ArrowSquareLeftIcon";
 import SettingLinearIcon from "@/components/ui/icons/SettingLinearIcon";
+import { useDeleteNutrition, useGetNutritionByID } from "@/hooks/useNutritions";
+import { useNutritionStore } from "@/store/nutritionStore";
 import { useLocalSearchParams, useNavigation, useRouter } from "expo-router";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   View,
   Text,
@@ -11,13 +13,31 @@ import {
   StyleSheet,
   TextInput,
   KeyboardAvoidingView,
+  TouchableWithoutFeedback,
+  ActivityIndicator,
 } from "react-native";
 import DateTimePickerModal from "react-native-modal-datetime-picker";
-
+import CloseSquareIcon from "@/components/ui/icons/CloseSquareIcon";
+import TrashLinearIcon from "@/components/ui/icons/TrashLinearIcon";
 export default function Page() {
   const { id } = useLocalSearchParams();
   const navigation = useNavigation();
   const router = useRouter();
+
+  const { nutrition, isLoading: isLoadingNutrition } = useGetNutritionByID(
+    Number(id)
+  );
+
+  const { name, value, createdAt, setName, setValue, setCreatedAt } =
+    useNutritionStore();
+
+  useEffect(() => {
+    if (nutrition) {
+      setName(nutrition.name);
+      setValue(nutrition.value);
+      setCreatedAt(new Date(nutrition.created_at));
+    }
+  }, [nutrition]);
 
   const [isStartDatePickerVisible, setStartDatePickerVisibility] =
     useState(false);
@@ -30,8 +50,6 @@ export default function Page() {
   const [startTime, setStartTime] = useState<Date | null>(new Date());
   const [endDate, setEndDate] = useState<Date | null>(new Date());
   const [endTime, setEndTime] = useState<Date | null>(new Date());
-  const [name, setName] = useState("Protein Shake");
-  const [value, setValue] = useState("2.5 g");
 
   const showDatePicker = (type: "start" | "end") => {
     if (type === "start") {
@@ -69,9 +87,11 @@ export default function Page() {
     if (type === "start") {
       setStartDate(date);
       hideDatePicker("start");
+      setCreatedAt(date);
     } else {
       setEndDate(date);
       hideDatePicker("end");
+      setCreatedAt(date);
     }
   };
 
@@ -95,6 +115,25 @@ export default function Page() {
       : "None";
   };
 
+  const [isDropdownVisible, setIsDropdownVisible] = useState(false); // State to track dropdown visibility
+
+  const toggleDropdown = () => {
+    setIsDropdownVisible(!isDropdownVisible);
+  };
+
+  const handleClose = () => {
+    setIsDropdownVisible(false);
+  };
+
+  const { deleteNutrition, isLoading: isDeleteLoading } = useDeleteNutrition(
+    Number(id)
+  );
+
+  const handleDelete = async (id: number) => {
+    await deleteNutrition(id);
+    navigation.goBack();
+  };
+
   return (
     <ScrollView
       contentContainerStyle={{
@@ -111,11 +150,69 @@ export default function Page() {
           <Text style={styles.headerHeading}>Session</Text>
         </View>
         <View>
-          <TouchableOpacity>
-            <SettingLinearIcon width={30} height={30} />
+          <TouchableOpacity onPress={toggleDropdown}>
+            {isDropdownVisible ? (
+              <CloseSquareIcon width={30} height={30} />
+            ) : (
+              <SettingLinearIcon width={30} height={30} />
+            )}
           </TouchableOpacity>
         </View>
       </View>
+      {isDropdownVisible && (
+        <View
+          style={{
+            flex: 1,
+            position: "absolute",
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            zIndex: 999,
+          }}
+        >
+          <TouchableWithoutFeedback onPress={handleClose}>
+            <View
+              style={{
+                flex: 1,
+                position: "relative",
+              }}
+            >
+              <View style={[styles.dropdown]}>
+                <TouchableOpacity
+                  style={[
+                    styles.dropdownItem,
+                    {
+                      borderRadius: 10,
+                    },
+                  ]}
+                  onPress={() => handleDelete(Number(id))}
+                >
+                  <View
+                    style={[styles.cardIcon2, { backgroundColor: "#1f1f1f" }]}
+                  >
+                    {isDeleteLoading ? (
+                      <ActivityIndicator size="small" color="#fff" />
+                    ) : (
+                      <TrashLinearIcon width={23} height={23} color="#fff" />
+                    )}
+                  </View>
+                  <View style={styles.cardContent}>
+                    <Text
+                      style={[
+                        styles.cardTitle,
+                        { color: "#fff", fontWeight: "500" },
+                      ]}
+                    >
+                      Delete
+                    </Text>
+                  </View>
+                </TouchableOpacity>
+              </View>
+            </View>
+          </TouchableWithoutFeedback>
+        </View>
+      )}
 
       <View style={{ marginTop: 30 }}>
         <View>
@@ -191,7 +288,7 @@ export default function Page() {
                   }}
                   onPress={() => showDatePicker("start")}
                 >
-                  <Text>{formatDate(startDate)}</Text>
+                  <Text>{formatDate(createdAt)}</Text>
                 </TouchableOpacity>
               </View>
             </View>
@@ -201,18 +298,11 @@ export default function Page() {
 
       {/* Date and Time Pickers */}
       <DateTimePickerModal
-        isVisible={isStartDatePickerVisible || isEndDatePickerVisible}
         mode="date"
-        onConfirm={(date) =>
-          isStartDatePickerVisible
-            ? handleConfirmDate(date, "start")
-            : handleConfirmDate(date, "end")
-        }
-        onCancel={() =>
-          isStartDatePickerVisible
-            ? hideDatePicker("start")
-            : hideDatePicker("end")
-        }
+        date={createdAt || new Date()}
+        isVisible={isStartDatePickerVisible}
+        onConfirm={(date) => handleConfirmDate(date, "start")}
+        onCancel={() => hideDatePicker("start")}
       />
     </ScrollView>
   );
@@ -243,4 +333,28 @@ const styles = StyleSheet.create({
     padding: 14,
     borderRadius: 8,
   },
+  dropdown: {
+    position: "absolute",
+    right: 0,
+    top: 70,
+    width: "50%",
+    backgroundColor: "#1f1f1f",
+    borderRadius: 10,
+    zIndex: 999,
+  },
+  dropdownItem: {
+    flexDirection: "row",
+    alignItems: "center",
+    padding: 8,
+    backgroundColor: "#1f1f1f",
+  },
+  cardIcon: { marginRight: 10 },
+  cardIcon2: {
+    marginRight: 10,
+    padding: 5,
+    backgroundColor: "#f2f3f8",
+    borderRadius: 8,
+  },
+  cardContent: {},
+  cardTitle: { fontSize: 14, fontWeight: "bold" },
 });

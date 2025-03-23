@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useRef } from "react";
 import {
   View,
   Text,
@@ -7,7 +7,12 @@ import {
   Dimensions,
   Platform,
 } from "react-native";
-import { Link, usePathname, useRouter } from "expo-router";
+import {
+  Link,
+  useLocalSearchParams,
+  usePathname,
+  useRouter,
+} from "expo-router";
 import HomeIcon from "../ui/icons/HomeIcon";
 import NoteIcon from "../ui/icons/NoteIcon";
 import SmsIcon from "../ui/icons/SmsIcon";
@@ -26,7 +31,16 @@ import Animated, {
 import ArrangeSquareLinearIcon from "../ui/icons/ArrangeSquareLinearIcon";
 import AddSquareLinearIcon from "../ui/icons/AddSquareLinearIcon";
 import { useKeyboardStore } from "@/store/tabbarStore";
-
+import { useSessionStore } from "@/store/sessionStore"; // Import our updated session store
+import StopLinearIcon from "../ui/icons/StopLinearIcon";
+import {
+  useCreateSession,
+  useGetSessions,
+  useUpdateSession,
+} from "@/hooks/useSessions";
+import { useSessionDetailsStore } from "@/store/sessionDetailsStore";
+import { useUpdateNutrition } from "@/hooks/useNutritions";
+import { useNutritionStore } from "@/store/nutritionStore";
 const { width } = Dimensions.get("window");
 
 export default function CustomTabBar() {
@@ -34,6 +48,113 @@ export default function CustomTabBar() {
   const pathname = usePathname();
   const isDisabled = pathname.split("/").length === 2;
   const { count, inc } = useKeyboardStore();
+
+  const { createSession, isLoading: isCreatingSession } = useCreateSession();
+
+  // Use our session store
+  const {
+    startTime,
+    endTime,
+    isActive,
+    startSession,
+    stopSession,
+    updateElapsedTime,
+    formatTime,
+    resetSession,
+  } = useSessionStore();
+
+  const { name, value, createdAt, setName, setValue, setCreatedAt } =
+    useNutritionStore();
+
+  // Set up interval for timer updates
+  useEffect(() => {
+    let intervalId: NodeJS.Timeout | null = null;
+
+    if (isActive) {
+      // Update every second
+      intervalId = setInterval(() => {
+        updateElapsedTime();
+      }, 1000);
+    } else if (intervalId) {
+      clearInterval(intervalId);
+    }
+
+    // Cleanup on unmount
+    return () => {
+      if (intervalId) {
+        clearInterval(intervalId);
+      }
+    };
+  }, [isActive, updateElapsedTime]);
+
+  const handleStartSession = () => {
+    startSession();
+  };
+
+  const handleStopSession = async () => {
+    stopSession();
+    const currentTime = new Date();
+
+    if (startTime && currentTime) {
+      const res = await createSession({
+        start_time: startTime,
+        end_time: currentTime,
+        activity_id: 1,
+      });
+
+      resetSession();
+      router.push(`/home/sessions/${res.payload.id}`);
+    }
+  };
+
+  const id = pathname.split("/")[3];
+  const { updateSession: updateSessionMutation, isLoading: isUpdatingSession } =
+    useUpdateSession(Number(id));
+  const {
+    startDate,
+    startTime: startTimeStore,
+    endDate,
+    endTime: endTimeStore,
+    notes,
+  } = useSessionDetailsStore();
+  const updateSession = async () => {
+    if (startDate && endDate && startTimeStore && endTimeStore) {
+      startDate.setHours(startTimeStore.getHours());
+      startDate.setMinutes(startTimeStore.getMinutes());
+      startDate.setSeconds(startTimeStore.getSeconds());
+      endDate.setHours(endTimeStore.getHours());
+      endDate.setMinutes(endTimeStore.getMinutes());
+      endDate.setSeconds(endTimeStore.getSeconds());
+      const id = pathname.split("/")[3];
+
+      await updateSessionMutation({
+        id: Number(id),
+        patchSession: {
+          start_time: startDate,
+          end_time: endDate,
+          notes: notes,
+        },
+      });
+    }
+  };
+
+  const {
+    updateNutrition: updateNutritionMutation,
+    isLoading: isUpdatingNutrition,
+  } = useUpdateNutrition(Number(id));
+
+  const handleUpdateNutrition = async () => {
+    if (name && value && createdAt) {
+      await updateNutritionMutation({
+        id: Number(id),
+        patchNutrition: {
+          name: name,
+          value: value,
+          created_at: createdAt,
+        },
+      });
+    }
+  };
 
   const isWorkoutPage = pathname.startsWith("/home/workouts/");
 
@@ -55,8 +176,6 @@ export default function CustomTabBar() {
   ];
 
   const isModal = pathname.includes("modal") && Platform.OS === "android";
-
-  console.log(pathname);
 
   const render = () => {
     if (isWorkoutExercisePage) {
@@ -96,7 +215,7 @@ export default function CustomTabBar() {
             justifyContent: "center",
             alignItems: "center",
           }}
-          onPress={() => console.log("Update Pressed")}
+          onPress={updateSession}
         >
           <Animated.View
             style={{
@@ -108,7 +227,7 @@ export default function CustomTabBar() {
           >
             <ArrangeSquareLinearIcon color={"#FFFFFF"} />
             <Text style={{ color: "#FFFFFF", marginLeft: 10 }}>
-              UPDATE SESSION
+              {isUpdatingSession ? "Saving..." : "UPDATE SESSION"}
             </Text>
           </Animated.View>
         </TouchableOpacity>
@@ -122,7 +241,7 @@ export default function CustomTabBar() {
             justifyContent: "center",
             alignItems: "center",
           }}
-          onPress={() => console.log("Update Pressed")}
+          onPress={handleStartSession}
         >
           <Animated.View
             style={{
@@ -134,7 +253,7 @@ export default function CustomTabBar() {
           >
             <AddSquareLinearIcon color={"#FFFFFF"} />
             <Text style={{ color: "#FFFFFF", marginLeft: 10 }}>
-              ADD NEW RECORD
+              START NEW SESSION
             </Text>
           </Animated.View>
         </TouchableOpacity>
@@ -176,7 +295,7 @@ export default function CustomTabBar() {
             justifyContent: "center",
             alignItems: "center",
           }}
-          onPress={() => console.log("Update Pressed")}
+          onPress={() => router.push(`/modal/create-nutrition/page`)}
         >
           <Animated.View
             style={{
@@ -202,7 +321,7 @@ export default function CustomTabBar() {
             justifyContent: "center",
             alignItems: "center",
           }}
-          onPress={() => console.log("Update Pressed Nutrition")}
+          onPress={handleUpdateNutrition}
         >
           <Animated.View
             style={{
@@ -240,6 +359,37 @@ export default function CustomTabBar() {
       style={[styles.container, isModal && { opacity: 0 }]}
       pointerEvents={isModal ? "none" : "auto"}
     >
+      {isActive && (
+        <View
+          style={{
+            backgroundColor: "#000",
+            paddingHorizontal: 10,
+            paddingVertical: 5,
+            borderRadius: 6,
+            zIndex: 1000,
+            flexDirection: "row",
+            justifyContent: "space-between",
+            alignItems: "center",
+            marginBottom: -6,
+          }}
+        >
+          <Text style={{ color: "#FFFFFF", marginBottom: 0, paddingBottom: 0 }}>
+            {formatTime()}
+          </Text>
+          <TouchableOpacity
+            style={{
+              marginLeft: 5,
+            }}
+            onPress={handleStopSession}
+          >
+            <Text
+              style={{ color: "#FFFFFF", marginBottom: 0, paddingBottom: 0 }}
+            >
+              <StopLinearIcon color={"red"} width={20} height={20} />
+            </Text>
+          </TouchableOpacity>
+        </View>
+      )}
       <View style={styles.tabBar}>{render()}</View>
     </View>
   );

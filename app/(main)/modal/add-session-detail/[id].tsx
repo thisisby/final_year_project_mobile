@@ -6,17 +6,20 @@ import {
   StyleSheet,
   ScrollView,
   TextInput,
+  ActivityIndicator,
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import CloseSquareIcon from "@/components/ui/icons/CloseSquareIcon";
-import { router } from "expo-router";
+import { router, useLocalSearchParams } from "expo-router";
 import TickSquareIcon from "@/components/ui/icons/TickSquareIcon";
 import TickSquareBoldIcon from "@/components/ui/icons/TickSquareBoldIcon";
 import ArrowSquareLeftIcon from "@/components/ui/icons/ArrowSquareLeftIcon";
 import AddIcon from "@/components/ui/icons/AddIcon";
 import AddSquareLinearIcon from "@/components/ui/icons/AddSquareLinearIcon";
+import { useCreateSessionDetails } from "@/hooks/useSessionDetail";
 
 export default function Page(): JSX.Element {
+  const { id } = useLocalSearchParams();
   const navigation = useNavigation();
   const [search, setSearch] = useState("");
   const [newExercise, setNewExercise] = useState(false);
@@ -28,10 +31,16 @@ export default function Page(): JSX.Element {
   const [name, setName] = useState("");
   const [value, setValue] = useState("");
 
-  const handleContinue = () => {
-    if (workoutName) {
-      setStage(2); // Move to the next stage
-    }
+  const { createSessionDetails, isLoading: isLoadingCreateSessionDetails } =
+    useCreateSessionDetails();
+
+  const handleContinue = async () => {
+    await createSessionDetails({
+      name,
+      value,
+      session_id: Number(id),
+    });
+    navigation.goBack();
   };
 
   return (
@@ -92,7 +101,11 @@ export default function Page(): JSX.Element {
             style={styles.continueButton}
             onPress={handleContinue}
           >
-            <Text style={styles.continueText}>Save</Text>
+            {isLoadingCreateSessionDetails ? (
+              <ActivityIndicator size="small" color="#fff" />
+            ) : (
+              <Text style={styles.continueText}>Save</Text>
+            )}
           </TouchableOpacity>
         </View>
       </ScrollView>
