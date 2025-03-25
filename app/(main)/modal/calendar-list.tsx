@@ -1,20 +1,66 @@
 import ArrowSquareLeftIcon from "@/components/ui/icons/ArrowSquareLeftIcon";
 import CalendarLinearIcon from "@/components/ui/icons/CalendarLinearIcon";
 import CloseSquareIcon from "@/components/ui/icons/CloseSquareIcon";
+import { useGetAnalyticsByDateRange } from "@/hooks/useAnalytics";
 import { router, useNavigation } from "expo-router";
-import React, { useState } from "react";
-import { View, StyleSheet, Text, TouchableOpacity } from "react-native";
+import React, { useEffect, useState } from "react";
+import {
+  View,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  ActivityIndicator,
+} from "react-native";
 import { CalendarList } from "react-native-calendars";
 import { ScrollView } from "react-native-reanimated/lib/typescript/Animated";
-
+import { useAnalyticsStore } from "@/store/analyticsStore";
 const CalendarScreen = () => {
-  const [selectedDate, setSelectedDate] = useState("");
+  const [selectedDates, setSelectedDates] = useState("");
   const today = new Date();
   const navigation = useNavigation();
-  const activeDates = {
-    "2025-02-09": { selected: true },
-    "2025-02-14": { selected: true },
-  };
+  // const activeDates = {
+  //   "2025-02-09": { selected: true },
+  //   "2025-02-14": { selected: true },
+  // };
+
+  const [activeDates, setActiveDates] = useState<any>({});
+
+  function convertDate(isoDateString: string) {
+    const date = new Date(isoDateString);
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, "0"); // Months are 0-indexed
+    const day = String(date.getDate()).padStart(2, "0");
+
+    return `${year}-${month}-${day}`;
+  }
+
+  function getFirstDayOfPreviousMonths(monthsAgo: number) {
+    const currentDate = new Date();
+    const targetDate = new Date(
+      currentDate.getFullYear(),
+      currentDate.getMonth() - monthsAgo,
+      1
+    );
+    return targetDate.toISOString().split("T")[0];
+  }
+
+  const { data, isLoading } = useGetAnalyticsByDateRange(
+    getFirstDayOfPreviousMonths(4),
+    today.toISOString().split("T")[0]
+  );
+
+  const { selectedDate, setSelectedDate } = useAnalyticsStore();
+
+  useEffect(() => {
+    if (data) {
+      const markedDates = data.reduce((acc, session) => {
+        const date = convertDate(session);
+        acc[date] = { selected: true };
+        return acc;
+      }, {});
+      setActiveDates(markedDates);
+    }
+  }, [data]);
 
   return (
     <View style={styles.container}>
@@ -33,22 +79,26 @@ const CalendarScreen = () => {
           showWeekNumbers={false}
           hideDayNames={true}
           hideArrows={true}
-          onDayPress={(day) => setSelectedDate(day.dateString)}
+          onDayPress={(day) => setSelectedDates(day.dateString)}
           markingType={"custom"}
           markedDates={{
             ...activeDates,
-            [selectedDate]: { selected: true },
+            [selectedDates]: { selected: true },
           }}
           monthFormat="MMM yyyy"
           dayComponent={({ date, state }) => {
-            const isSelected = date.dateString === selectedDate;
+            const isSelected = date.dateString === selectedDates;
             const isActive = activeDates[date.dateString];
             const isToday =
               date.dateString === today.toISOString().split("T")[0];
 
             return (
               <TouchableOpacity
-                onPress={() => setSelectedDate(date.dateString)}
+                onPress={() => {
+                  setSelectedDates(date.dateString);
+                  setSelectedDate(new Date(date.dateString));
+                  navigation.goBack();
+                }}
               >
                 <View
                   style={[

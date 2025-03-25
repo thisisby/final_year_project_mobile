@@ -3,8 +3,14 @@ import CloseSquareIcon from "@/components/ui/icons/CloseSquareIcon";
 import RowHorizontalIcon from "@/components/ui/icons/RowHorizontalIcon";
 import RowVerticalIcon from "@/components/ui/icons/RowVerticalIcon";
 import SettingLinearIcon from "@/components/ui/icons/SettingLinearIcon";
-import { router, useNavigation, useRouter } from "expo-router";
-import React, { useState } from "react";
+import { useExerciseSets } from "@/hooks/useExerciseSets";
+import {
+  router,
+  useNavigation,
+  useRouter,
+  useLocalSearchParams,
+} from "expo-router";
+import React, { useEffect, useState } from "react";
 import {
   View,
   Text,
@@ -13,12 +19,14 @@ import {
   TouchableOpacity,
   TextInput,
   Dimensions,
+  ActivityIndicator,
 } from "react-native";
 import { CurveType, LineChart } from "react-native-gifted-charts";
 
 const { width: screenWidth } = Dimensions.get("window");
 
 export default function Page() {
+  const { id } = useLocalSearchParams();
   const [activeCategory, setActiveCategory] = useState("All");
   const [isMasonryView, setIsMasonryView] = useState(true); // Toggle between views
   const navigation = useNavigation();
@@ -34,33 +42,32 @@ export default function Page() {
         "A basic upper body exercise to strengthen your chest, shoulders, and arms.",
     },
   ];
-  // Split workouts into two columns for masonry effect
-  const column1 = workouts.filter((_, index) => index % 2 === 0);
-  const column2 = workouts.filter((_, index) => index % 2 !== 0);
 
-  const lineData = [
-    { value: 10, dataPointText: "20" },
-    { value: 10, dataPointText: "24" },
-    { value: 20, dataPointText: "28" },
-    { value: 40, dataPointText: "32" },
-    { value: 30, dataPointText: "36" },
-    { value: 20, dataPointText: "40" },
-    { value: 50, dataPointText: "44" },
-    { value: 60, dataPointText: "48" },
-    { value: 30, dataPointText: "52" },
-  ];
+  const [sets, setSets] = useState<any[]>([]);
+  const [weights, setWeights] = useState<any[]>([]);
 
-  const lineData2 = [
-    { value: 10, dataPointText: "20" },
-    { value: 10, dataPointText: "24" },
-    { value: 20, dataPointText: "28" },
-    { value: 40, dataPointText: "32" },
-    { value: 30, dataPointText: "36" },
-    { value: 20, dataPointText: "40" },
-    { value: 50, dataPointText: "44" },
-    { value: 60, dataPointText: "48" },
-    { value: 30, dataPointText: "52" },
-  ];
+  const { isLoading, data } = useExerciseSets(Number(id));
+
+  useEffect(() => {
+    if (data) {
+      setSets(
+        data.payload.map((set) => ({
+          value: set.reps,
+          dataPointText: set.reps,
+        }))
+      );
+      setWeights(
+        data.payload.map((set) => ({
+          value: set.weight,
+          dataPointText: set.weight,
+        }))
+      );
+    }
+  }, [data]);
+
+  if (isLoading) {
+    return <ActivityIndicator size="large" color="#0000ff" />;
+  }
   return (
     <ScrollView
       contentContainerStyle={styles.scrollContainer}
@@ -71,7 +78,7 @@ export default function Page() {
           <ArrowSquareLeftIcon width={30} height={30} />
         </TouchableOpacity>
         <View>
-          <Text style={styles.headerHeading}>Analytics</Text>
+          <Text style={styles.headerHeading}>Graphs</Text>
         </View>
         <View>
           <SettingLinearIcon width={30} height={30} />
@@ -79,7 +86,7 @@ export default function Page() {
       </View>
 
       {/* Horizontal Scroll for Categories */}
-      <ScrollView
+      {/* <ScrollView
         horizontal
         showsHorizontalScrollIndicator={false}
         style={styles.categoryContainer}
@@ -103,7 +110,7 @@ export default function Page() {
             </Text>
           </TouchableOpacity>
         ))}
-      </ScrollView>
+      </ScrollView> */}
 
       <View
         style={{
@@ -126,7 +133,7 @@ export default function Page() {
           Sets
         </Text>
         <LineChart
-          data={lineData}
+          data={sets}
           color1="#e36b7c"
           color2="#4d578d"
           dataPointsColor="#333"
@@ -170,7 +177,7 @@ export default function Page() {
           Weights
         </Text>
         <LineChart
-          data={lineData2}
+          data={weights}
           height={150}
           color1="#6e6aff"
           dataPointsColor="#333"

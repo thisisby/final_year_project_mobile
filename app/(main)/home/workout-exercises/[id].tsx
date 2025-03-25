@@ -232,7 +232,7 @@ export default function Page(): JSX.Element {
             <ActivityLinearIcon width={22} height={22} />
           </View>
           <View style={styles.cardContent}>
-            <Text style={styles.analyticsText}>Analytics</Text>
+            <Text style={styles.analyticsText}>Graphs</Text>
           </View>
         </TouchableOpacity>
 

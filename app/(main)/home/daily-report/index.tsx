@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   View,
   Text,
@@ -22,13 +22,15 @@ import TimerIcon from "@/components/ui/icons/TimerIcon";
 import AddIcon from "@/components/ui/icons/AddIcon";
 import AddSquareLinearIcon from "@/components/ui/icons/AddSquareLinearIcon";
 import TimerLinearIcon from "@/components/ui/icons/TimerLinearIcon";
+import { useGetAnalytics } from "@/hooks/useAnalytics";
+import { useAnalyticsStore } from "@/store/analyticsStore";
 
 function createDatesArray(year: number, month: number): Date[] {
   const datesArray: Date[] = [];
   const numDays = new Date(year, month + 1, 0).getDate();
 
   for (let day = 1; day <= numDays; day++) {
-    datesArray.push(new Date(year, month, day));
+    datesArray.push(new Date(year, month, day, 0, 0, 0));
   }
 
   return datesArray;
@@ -37,9 +39,26 @@ function createDatesArray(year: number, month: number): Date[] {
 export default function Page(): JSX.Element {
   const navigation = useNavigation();
   const today = new Date();
-  const [currentDate, setCurrentDate] = React.useState(today); // Tracks the current month/year
-  const [selectedDate, setSelectedDate] = React.useState(today);
+  const [currentDate, setCurrentDate] = useState(() => {
+    return new Date();
+  });
   const scrollRef = React.useRef<ScrollView>(null);
+
+  const { selectedDate, setSelectedDate, isIncrease, setIsIncrease } =
+    useAnalyticsStore();
+
+  const getDateOnIncrease = (date: Date) => {
+    return date
+      .toLocaleDateString("en-CA", {
+        year: "numeric",
+        month: "2-digit",
+        day: "2-digit",
+      })
+      .replace(/\//g, "-");
+  };
+  const { data: analytics, isLoading: analyticsLoading } = useGetAnalytics(
+    getDateOnIncrease(selectedDate)
+  );
 
   const datesArray = createDatesArray(
     currentDate.getFullYear(),
@@ -109,19 +128,47 @@ export default function Page(): JSX.Element {
     1
   ).toLocaleString("default", { month: "short" }); // "Nov" for November
 
-  const data = [
-    { value: 6, date: new Date(2023, 9, 5) }, // October 1, 2023
-    { value: 6, date: new Date(2023, 9, 6) }, // October 2, 2023
-    { value: 8, date: new Date(2023, 9, 7) }, // October 3, 2023
-    { value: 5, date: new Date(2023, 9, 8) }, // October 4, 2023
-    { value: 5, date: new Date(2023, 9, 9) }, // October 5, 2023
-    { value: 8, date: new Date(2023, 9, 10) }, // October 6, 2023
-    { value: 0, date: new Date(2023, 9, 11) }, // October 7, 2023
-  ];
+  const calculateDuration = (startTime: string, endTime: string) => {
+    const start = new Date(startTime);
+    const end = new Date(endTime);
+    const durationMs = end.getTime() - start.getTime();
 
-  const xAxisLabels = data.map((item) => {
-    return item.date.toLocaleDateString("en-US", { weekday: "short" }); // Display only the day (e.g., "1", "2", etc.)
-  });
+    // Convert to hours, minutes, seconds
+    const seconds = Math.floor((durationMs / 1000) % 60);
+    const minutes = Math.floor((durationMs / (1000 * 60)) % 60);
+    const hours = Math.floor(durationMs / (1000 * 60 * 60));
+
+    if (hours > 0) {
+      return `${hours}h ${minutes}m`;
+    } else if (minutes > 0) {
+      return `${minutes}m ${seconds}s`;
+    } else {
+      return `${seconds}s`;
+    }
+  };
+
+  useEffect(() => {
+    setCurrentDate(selectedDate);
+  }, [selectedDate]);
+
+  useEffect(() => {
+    setSelectedDate(new Date());
+  }, []);
+
+  const handleDateSelection = (date: Date) => {
+    // Ensure the date is created in the local time zone
+    const localDate = new Date(
+      date.getFullYear(),
+      date.getMonth(),
+      date.getDate(),
+      0,
+      0,
+      0 // Set time to midnight in local time
+    );
+
+    setSelectedDate(localDate);
+  };
+  console.log("Current Selected Date:", selectedDate);
   return (
     <ScrollView
       contentContainerStyle={{
@@ -169,11 +216,13 @@ export default function Page(): JSX.Element {
           </TouchableOpacity>
           {datesArray.map((date) => (
             <TouchableOpacity
-              key={date.getDate()}
-              onPress={() => setSelectedDate(date)}
+              key={date.toISOString()}
+              onPress={() => handleDateSelection(new Date(date))}
               style={[
                 styles.dateItem,
-                date.getDate() === selectedDate.getDate() &&
+                date.getFullYear() === selectedDate.getFullYear() &&
+                  date.getMonth() === selectedDate.getMonth() &&
+                  date.getDate() === selectedDate.getDate() &&
                   styles.selectedDateItem,
               ]}
             >
@@ -181,22 +230,30 @@ export default function Page(): JSX.Element {
                 <Text
                   style={[
                     { marginBottom: 8 },
-                    selectedDate.getDate() === date.getDate()
-                      ? { color: "#fff" } // Приоритет 1: выбранная дата
-                      : today.getDate() === date.getDate()
-                      ? { color: "#de713f" } // Приоритет 2: сегодняшняя дата
-                      : { color: "#898989" }, // Стандартный цвет
+                    date.getFullYear() === selectedDate.getFullYear() &&
+                    date.getMonth() === selectedDate.getMonth() &&
+                    date.getDate() === selectedDate.getDate()
+                      ? { color: "#fff" } // Priority 1: selected date
+                      : today.getFullYear() === date.getFullYear() &&
+                        today.getMonth() === date.getMonth() &&
+                        today.getDate() === date.getDate()
+                      ? { color: "#de713f" } // Priority 2: today's date
+                      : { color: "#898989" }, // Default color
                   ]}
                 >
                   {date.toLocaleString("en-US", { weekday: "short" })}
                 </Text>
                 <Text
                   style={[
-                    selectedDate.getDate() === date.getDate()
-                      ? { color: "#fff" } // Приоритет 1: выбранная дата
-                      : today.getDate() === date.getDate()
-                      ? { color: "#de713f" } // Приоритет 2: сегодняшняя дата
-                      : { color: "#898989" }, // Стандартный цвет
+                    date.getFullYear() === selectedDate.getFullYear() &&
+                    date.getMonth() === selectedDate.getMonth() &&
+                    date.getDate() === selectedDate.getDate()
+                      ? { color: "#fff" } // Priority 1: selected date
+                      : today.getFullYear() === date.getFullYear() &&
+                        today.getMonth() === date.getMonth() &&
+                        today.getDate() === date.getDate()
+                      ? { color: "#de713f" } // Priority 2: today's date
+                      : { color: "#898989" }, // Default color
                   ]}
                 >
                   {date.getDate()}
@@ -273,7 +330,7 @@ export default function Page(): JSX.Element {
             Duration
           </Text>
           <Text style={{ fontSize: 18, fontWeight: "500", color: "#fff" }}>
-            20m
+            {analytics?.session_time}
           </Text>
         </View>
         <View
@@ -296,7 +353,9 @@ export default function Page(): JSX.Element {
           >
             Exercises
           </Text>
-          <Text style={{ fontSize: 18, fontWeight: "500" }}>17</Text>
+          <Text style={{ fontSize: 18, fontWeight: "500" }}>
+            {analytics?.exercises}
+          </Text>
         </View>
         <View
           style={{
@@ -318,7 +377,9 @@ export default function Page(): JSX.Element {
           >
             Sets
           </Text>
-          <Text style={{ fontSize: 18, fontWeight: "500" }}>6</Text>
+          <Text style={{ fontSize: 18, fontWeight: "500" }}>
+            {analytics?.sets}
+          </Text>
         </View>
         <View
           style={{
@@ -340,7 +401,9 @@ export default function Page(): JSX.Element {
           >
             Reps
           </Text>
-          <Text style={{ fontSize: 18, fontWeight: "500" }}>40</Text>
+          <Text style={{ fontSize: 18, fontWeight: "500" }}>
+            {analytics?.reps}
+          </Text>
         </View>
       </View>
 
@@ -363,21 +426,19 @@ export default function Page(): JSX.Element {
             flexWrap: "wrap",
           }}
         >
-          <View style={styles.card3}>
-            <Text style={styles.cardTitle}>Squat</Text>
-          </View>
-          <View style={styles.card3}>
-            <Text style={styles.cardTitle}>Dumbell Press</Text>
-          </View>
-          <View style={styles.card3}>
-            <Text style={styles.cardTitle}>Bench Press</Text>
-          </View>
-          <View style={styles.card3}>
-            <Text style={styles.cardTitle}>Calf Rises</Text>
-          </View>
-          <View style={styles.card3}>
-            <Text style={styles.cardTitle}>Dips</Text>
-          </View>
+          {analytics?.details && Object.keys(analytics?.details).length > 0 ? (
+            Object.keys(analytics?.details).map((item, id) => {
+              return (
+                <View style={styles.card3} key={id}>
+                  <Text style={styles.cardTitle}>{item}</Text>
+                </View>
+              );
+            })
+          ) : (
+            <View style={styles.card3}>
+              <Text style={styles.cardTitle}>No exercises</Text>
+            </View>
+          )}
         </View>
       </View>
 
@@ -391,98 +452,55 @@ export default function Page(): JSX.Element {
         </Heading>
 
         <View>
-          <View
-            style={{
-              paddingVertical: 8,
-              paddingHorizontal: 10,
-              borderRadius: 8,
-              borderWidth: 1,
-              borderColor: "#efefef",
-              display: "flex",
-              flexDirection: "row",
-              gap: 10,
-              alignItems: "center",
-              marginBottom: 8,
-            }}
-          >
-            <View
-              style={{
-                padding: 4,
-                borderRadius: 6,
-                backgroundColor: "#f1f1f1",
-              }}
-            >
-              <TimerLinearIcon width={24} height={24} />
+          {analytics?.sessions.length > 0 ? (
+            analytics?.sessions.map((item, id) => {
+              return (
+                <TouchableOpacity
+                  key={id}
+                  onPress={() => router.push(`/home/sessions/${item.id}`)}
+                >
+                  <View
+                    style={{
+                      paddingVertical: 8,
+                      paddingHorizontal: 10,
+                      borderRadius: 8,
+                      borderWidth: 1,
+                      borderColor: "#efefef",
+                      display: "flex",
+                      flexDirection: "row",
+                      gap: 10,
+                      alignItems: "center",
+                      marginBottom: 8,
+                    }}
+                  >
+                    <View
+                      style={{
+                        padding: 4,
+                        borderRadius: 6,
+                        backgroundColor: "#f1f1f1",
+                      }}
+                    >
+                      <TimerLinearIcon width={24} height={24} />
+                    </View>
+                    <View>
+                      <Text style={styles.cardTitle}>{item.activity.name}</Text>
+                      <Text
+                        style={{ fontSize: 12, color: "#666", marginTop: 2 }}
+                      >
+                        {calculateDuration(item.start_time, item.end_time)}
+                      </Text>
+                    </View>
+                  </View>
+                </TouchableOpacity>
+              );
+            })
+          ) : (
+            <View style={{ display: "flex", flexDirection: "row" }}>
+              <View style={styles.card3}>
+                <Text style={styles.cardTitle}>No sessions</Text>
+              </View>
             </View>
-            <View>
-              <Text style={styles.cardTitle}>Strength Training</Text>
-              <Text style={{ fontSize: 12, color: "#666", marginTop: 2 }}>
-                10 mins
-              </Text>
-            </View>
-          </View>
-
-          <View
-            style={{
-              paddingVertical: 8,
-              paddingHorizontal: 10,
-              borderRadius: 8,
-              borderWidth: 1,
-              borderColor: "#efefef",
-              display: "flex",
-              flexDirection: "row",
-              gap: 10,
-              alignItems: "center",
-              marginBottom: 8,
-            }}
-          >
-            <View
-              style={{
-                padding: 4,
-                borderRadius: 6,
-                backgroundColor: "#f1f1f1",
-              }}
-            >
-              <TimerLinearIcon width={24} height={24} />
-            </View>
-            <View>
-              <Text style={styles.cardTitle}>Strength Training</Text>
-              <Text style={{ fontSize: 12, color: "#666", marginTop: 2 }}>
-                10 mins
-              </Text>
-            </View>
-          </View>
-
-          <View
-            style={{
-              paddingVertical: 8,
-              paddingHorizontal: 10,
-              borderRadius: 8,
-              borderWidth: 1,
-              borderColor: "#efefef",
-              display: "flex",
-              flexDirection: "row",
-              gap: 10,
-              alignItems: "center",
-              marginBottom: 8,
-            }}
-          >
-            <View
-              style={{
-                padding: 4,
-                borderRadius: 6,
-                backgroundColor: "#f1f1f1",
-              }}
-            >
-              <TimerLinearIcon width={24} height={24} />
-            </View>
-            <View>
-              <Text style={styles.cardTitle}>Strength Training</Text>
-              <Text style={{ fontSize: 12, color: "#666", marginTop: 2 }}>
-                10 mins
-              </Text>
-            </View>
-          </View>
+          )}
         </View>
       </View>
     </ScrollView>

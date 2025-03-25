@@ -25,6 +25,7 @@ import NutritionIcon from "@/components/ui/icons/NutritionIcon";
 import { useWorkouts } from "@/hooks/useWorkouts";
 import { useSessionStore } from "@/store/sessionStore";
 import { useGetSessions } from "@/hooks/useSessions";
+import { useAnalyticsStore } from "@/store/analyticsStore";
 
 export default function Page() {
   const { user } = useUserStore();
