@@ -28,6 +28,7 @@ export default function Page(): JSX.Element {
   const { isLoading, data } = useWorkouts();
   const { id } = useLocalSearchParams();
   const [isPrivate, setIsPrivate] = useState(false);
+  const [price, setPrice] = useState(null);
 
   const { patchWorkout, isLoading: isPatchLoading } = usePatchWorkout();
 
@@ -38,6 +39,7 @@ export default function Page(): JSX.Element {
       setWorkoutName(workout.title);
       setWorkoutDescription(workout.description);
       setIsPrivate(workout.is_private);
+      setPrice(workout.price);
     }
   }, [isLoading, data]);
 
@@ -58,6 +60,7 @@ export default function Page(): JSX.Element {
         title: workoutName,
         description: workoutDescription,
         is_private: isPrivate,
+        price: price,
       },
     });
 
@@ -148,6 +151,32 @@ export default function Page(): JSX.Element {
               Is Private
             </Text>
             <Switch value={isPrivate} onValueChange={setIsPrivate} />
+          </View>
+          <View>
+            <Text
+              style={{
+                fontSize: 14,
+                fontWeight: "700",
+                marginBottom: 4,
+              }}
+            >
+              Price
+            </Text>
+            <TextInput
+              style={[styles.input, { marginBottom: 18 }]}
+              placeholder="0.00"
+              placeholderTextColor="#999999"
+              value={price !== null ? price.toString() : ""} // Display as string
+              onChangeText={(text) => {
+                const parsed = parseFloat(text);
+                if (!isNaN(parsed)) {
+                  setPrice(parsed);
+                } else if (text === "") {
+                  setPrice(null);
+                }
+              }}
+              keyboardType="numeric"
+            />
           </View>
 
           <TouchableOpacity

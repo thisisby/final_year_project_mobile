@@ -30,7 +30,7 @@ export default function Page(): JSX.Element {
   const router = useRouter();
   const { id } = useLocalSearchParams();
   const [isDropdownVisible, setIsDropdownVisible] = useState(false);
-  const [currentExercise, setCurrentExercise] = useState<Exercise | null>(null);
+  const [currentExercise, setCurrentExercise] = useState(null);
 
   const {
     reps: storeReps,
@@ -51,8 +51,12 @@ export default function Page(): JSX.Element {
     if (workoutData && !isWorkoutLoading) {
       workoutData.payload.forEach((workout) => {
         workout.exercises.forEach((exercise) => {
+          console.log(exercise);
           if (exercise.id === Number(id)) {
-            setCurrentExercise(exercise.exercise);
+            setCurrentExercise({
+              ...exercise.exercise,
+              link: exercise.secondary_note,
+            });
           }
         });
       });
@@ -168,29 +172,57 @@ export default function Page(): JSX.Element {
                   </View>
                 </TouchableOpacity>
 
-                <TouchableOpacity
-                  style={[
-                    styles.dropdownItem,
-                    { borderBottomWidth: 1, borderBottomColor: "#000" },
-                  ]}
-                  onPress={() => {
-                    setIsDropdownVisible(false);
-                    router.push(
-                      `/modal/get-exercise-info/${currentExercise?.name}`
-                    );
-                  }}
-                >
-                  <View style={styles.cardIcon2}>
-                    <GlobalSearchLinearIcon
-                      width={22}
-                      height={22}
-                      color="#fff"
-                    />
-                  </View>
-                  <View style={styles.cardContent}>
-                    <Text style={styles.cardTitle}>Info</Text>
-                  </View>
-                </TouchableOpacity>
+                {currentExercise?.link ? (
+                  <TouchableOpacity
+                    style={[
+                      styles.dropdownItem,
+                      { borderBottomWidth: 1, borderBottomColor: "#000" },
+                    ]}
+                    onPress={() => {
+                      setIsDropdownVisible(false);
+                      const encodedLink = encodeURIComponent(
+                        currentExercise?.link
+                      ); // Encode the URL
+
+                      router.push(`/modal/get-exercise-link/${encodedLink}`);
+                    }}
+                  >
+                    <View style={styles.cardIcon2}>
+                      <GlobalSearchLinearIcon
+                        width={22}
+                        height={22}
+                        color="#fff"
+                      />
+                    </View>
+                    <View style={styles.cardContent}>
+                      <Text style={styles.cardTitle}>Info</Text>
+                    </View>
+                  </TouchableOpacity>
+                ) : (
+                  <TouchableOpacity
+                    style={[
+                      styles.dropdownItem,
+                      { borderBottomWidth: 1, borderBottomColor: "#000" },
+                    ]}
+                    onPress={() => {
+                      setIsDropdownVisible(false);
+                      router.push(
+                        `/modal/get-exercise-info/${currentExercise?.name}`
+                      );
+                    }}
+                  >
+                    <View style={styles.cardIcon2}>
+                      <GlobalSearchLinearIcon
+                        width={22}
+                        height={22}
+                        color="#fff"
+                      />
+                    </View>
+                    <View style={styles.cardContent}>
+                      <Text style={styles.cardTitle}>Info</Text>
+                    </View>
+                  </TouchableOpacity>
+                )}
 
                 <TouchableOpacity
                   style={[

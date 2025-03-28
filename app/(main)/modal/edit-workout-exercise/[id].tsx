@@ -16,24 +16,31 @@ import TickSquareBoldIcon from "@/components/ui/icons/TickSquareBoldIcon";
 import ArrowSquareLeftIcon from "@/components/ui/icons/ArrowSquareLeftIcon";
 import AddIcon from "@/components/ui/icons/AddIcon";
 import AddSquareLinearIcon from "@/components/ui/icons/AddSquareLinearIcon";
-import { usePatchWorkoutExercise } from "@/hooks/useWorkoutExercise";
-import { useWorkouts } from "@/hooks/useWorkouts";
+import {
+  useGetWorkoutExerciseByID,
+  usePatchWorkoutExercise,
+} from "@/hooks/useWorkoutExercise";
+import { useGetWorkoutByID, useWorkouts } from "@/hooks/useWorkouts";
 
 export default function Page(): JSX.Element {
   const navigation = useNavigation();
   const [exerciseDescription, setExerciseDescription] = useState("");
+  const [secondary_note, setSecondaryNote] = useState("");
 
-  const { isLoading, data } = useWorkouts();
+  // const { isLoading, data } = useWorkouts();
   const { id } = useLocalSearchParams();
 
+  const { patchWorkoutExercise, isLoading: isPatchLoading } =
+    usePatchWorkoutExercise();
 
-  const { patchWorkoutExercise, isLoading: isPatchLoading } = usePatchWorkoutExercise();
+  const { data, isLoading } = useGetWorkoutExerciseByID(Number(id));
 
   const handleSave = async () => {
     await patchWorkoutExercise({
       id: Number(id),
       patchWorkoutExercise: {
         main_note: exerciseDescription,
+        secondary_note: secondary_note,
       },
     });
 
@@ -42,18 +49,11 @@ export default function Page(): JSX.Element {
 
   useEffect(() => {
     if (!isLoading && data) {
-      for (let workout of data.payload) {
-        const foundExercise = workout.exercises.find(ex => ex.id === Number(id));
-        if (foundExercise) {
-          setExerciseDescription(foundExercise.main_note);
-          break;
-        }
-      }
-
+      setExerciseDescription(data?.payload?.main_note);
+      setSecondaryNote(data?.payload?.secondary_note);
     }
   }, [isLoading, data]);
 
-  
   if (isLoading) {
     return (
       <ActivityIndicator
@@ -72,11 +72,9 @@ export default function Page(): JSX.Element {
         }}
       >
         <View style={styles.header}>
-          
-            <TouchableOpacity onPress={() => navigation.goBack()}>
-              <CloseSquareIcon width={36} height={36} />
-            </TouchableOpacity>
-
+          <TouchableOpacity onPress={() => navigation.goBack()}>
+            <CloseSquareIcon width={36} height={36} />
+          </TouchableOpacity>
 
           <View>
             <Text style={styles.headerHeading}>Edit Exercise</Text>
@@ -102,10 +100,24 @@ export default function Page(): JSX.Element {
             multiline={true}
           />
 
-          <TouchableOpacity
-            style={styles.continueButton}
-            onPress={handleSave}
+          <Text
+            style={{
+              fontSize: 14,
+              fontWeight: "700",
+              marginBottom: 4,
+            }}
           >
+            Link
+          </Text>
+          <TextInput
+            style={[styles.input, { marginBottom: 18 }]}
+            placeholder="https://www.youtube.com/watch?v=example"
+            placeholderTextColor="#999999"
+            value={secondary_note}
+            onChangeText={setSecondaryNote}
+          />
+
+          <TouchableOpacity style={styles.continueButton} onPress={handleSave}>
             {isPatchLoading ? (
               <ActivityIndicator size="small" color="#fff " />
             ) : (

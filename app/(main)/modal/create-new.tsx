@@ -41,6 +41,8 @@ export default function Page(): JSX.Element {
   const [workoutDescription, setWorkoutDescription] = useState("");
   const [exerciseLists, setExerciseLists] = useState<ExerciseListItem[]>([]);
   const [isPrivate, setIsPrivate] = useState(false);
+  const [isPaid, setIsPaid] = useState(false);
+  const [price, setPrice] = useState(null);
 
   const { createWorkout, isLoading: isCreateLoading } = useCreateWorkout();
 
@@ -60,8 +62,11 @@ export default function Page(): JSX.Element {
       title: workoutName,
       description: workoutDescription,
       is_private: isPrivate,
+      price: isPaid ? Number(price) : 0,
       workoutExercises: selectedExercises,
     };
+
+    console.log("newWorkout", newWorkout); // Log the new workout data
 
     if (selectedExercises.length === 0) {
       return;
@@ -169,7 +174,6 @@ export default function Page(): JSX.Element {
                 }
                 maxLength={30}
               />
-
               <Text
                 style={{
                   fontSize: 14,
@@ -187,7 +191,6 @@ export default function Page(): JSX.Element {
                 onChangeText={setWorkoutDescription}
                 multiline={true}
               />
-
               <View
                 style={{
                   flexDirection: "row",
@@ -207,12 +210,62 @@ export default function Page(): JSX.Element {
                     marginBottom: 4,
                   }}
                 >
-                  Is Private
+                  Private
                 </Text>
                 <Switch value={isPrivate} onValueChange={setIsPrivate} />
               </View>
+              <View
+                style={{
+                  flexDirection: "row",
+                  alignItems: "center",
+                  justifyContent: "space-between",
+                  marginBottom: 10,
+                  backgroundColor: "#efefef",
+                  paddingHorizontal: 8,
+                  paddingVertical: Platform.OS === "ios" ? 8 : 2,
+                  borderRadius: 10,
+                }}
+              >
+                <Text
+                  style={{
+                    fontSize: 14,
+                    fontWeight: "700",
+                    marginBottom: 4,
+                  }}
+                >
+                  Paid
+                </Text>
+                <Switch value={isPaid} onValueChange={setIsPaid} />
+              </View>
+              {isPaid && (
+                <View>
+                  <Text
+                    style={{
+                      fontSize: 14,
+                      fontWeight: "700",
+                      marginBottom: 4,
+                    }}
+                  >
+                    Price
+                  </Text>
+                  <TextInput
+                    style={[styles.input, { marginBottom: 18 }]}
+                    placeholder="0.00"
+                    placeholderTextColor="#999999"
+                    value={price !== null ? price.toString() : ""} // Display as string
+                    onChangeText={(text) => {
+                      const parsed = parseFloat(text);
+                      if (!isNaN(parsed)) {
+                        setPrice(parsed);
+                      } else if (text === "") {
+                        setPrice(null);
+                      }
+                    }}
+                    keyboardType="numeric"
+                  />
+                </View>
+              )}
             </View>
-
             <TouchableOpacity
               style={styles.continueButton}
               onPress={handleContinue}

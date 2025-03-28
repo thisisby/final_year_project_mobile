@@ -143,9 +143,9 @@ export default function Page() {
 
         <Animated.View style={[styles.masonryContainer, { opacity: fadeAnim }]}>
           <View style={styles.masonryColumn}>
-            {columnOne.map((workout) => (
+            {columnOne.map((workout, idx) => (
               <TouchableOpacity
-                key={workout.id}
+                key={idx}
                 onPress={() => router.push(`/samba/user-profile/${workout.id}`)}
                 style={styles.workoutItem}
               >
@@ -198,9 +198,9 @@ export default function Page() {
           </View>
 
           <View style={styles.masonryColumn}>
-            {columnTwo.map((workout) => (
+            {columnTwo.map((workout, idx) => (
               <TouchableOpacity
-                key={workout.id}
+                key={idx}
                 onPress={() => router.push(`/samba/user-profile/${workout.id}`)}
                 style={styles.workoutItem}
               >

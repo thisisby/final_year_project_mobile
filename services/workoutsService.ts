@@ -31,6 +31,7 @@ export type CreateWorkoutRequest = {
   title: string;
   description?: string;
   is_private?: boolean;
+  price: number;
   workoutExercises: number[];
 };
 export const getWorkouts = async (userID: number): Promise<Workout[]> => {
@@ -69,6 +70,7 @@ export type PatchWorkout = {
   title?: string;
   description?: string;
   is_private?: boolean;
+  price?: number;
 };
 export const patchWorkout = async ({
   id,
