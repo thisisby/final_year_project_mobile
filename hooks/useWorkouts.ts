@@ -6,6 +6,7 @@ import {
   getWorkouts,
   patchWorkout,
   copyWorkout,
+  findAllWorkoutsByUserID,
 } from "@/services/workoutsService";
 import { useUserStore } from "@/store/userStore";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -61,6 +62,8 @@ export function usePatchWorkout() {
   const mutation = useMutation(patchWorkout, {
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ["workouts"] });
+      queryClient.invalidateQueries({ queryKey: ["explore-workout-by-id"] });
+
       console.log("workout patched", data);
     },
     onError: (error) => {
@@ -105,3 +108,15 @@ export function useGetWorkoutByID(id: number) {
   });
 }
 
+export function useFindAllWorkoutsByUserID(userID: number) {
+  return useQuery({
+    queryKey: ["user-workouts", userID],
+    queryFn: () => findAllWorkoutsByUserID(userID),
+    onSuccess: (data) => {
+      console.log("user workouts", data);
+    },
+    onError: (error) => {
+      console.error("user workouts error", error);
+    },
+  });
+}

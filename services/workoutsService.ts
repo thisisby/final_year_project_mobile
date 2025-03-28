@@ -84,9 +84,12 @@ export const getWorkoutByID = async (id: number) => {
   return response.data;
 };
 
-
 export const copyWorkout = async (workoutID: number) => {
   const response = await api.get(`/workouts/${workoutID}/copy`);
   return response.data;
 };
 
+export const findAllWorkoutsByUserID = async (userID: number) => {
+  const response = await api.get(`/users/${userID}/workouts`);
+  return response.data;
+};

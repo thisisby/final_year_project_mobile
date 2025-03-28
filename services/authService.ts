@@ -1,4 +1,5 @@
 import axios from "axios";
+import api from "./apiBase";
 
 // const API_URL = "http://3.87.183.239/api/v1";
 const API_URL = "http://192.168.0.238:8080/api/v1";
@@ -25,8 +26,7 @@ export const signup = async (credentials: SignupCredentials) => {
   return loginResponse;
 };
 
-export const getMe = async (token: string) => {
-  axios.defaults.headers.common["Authorization"] = `Bearer ${token}`;
-  const response = await axios.get(`${API_URL}/me`);
+export const getMe = async () => {
+  const response = await api.get(`/me`);
   return response.data;
 };

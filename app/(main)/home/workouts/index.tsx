@@ -114,7 +114,7 @@ export default function Page(): JSX.Element {
       </Text>
 
       {/* Exercise Lists */}
-      <GestureHandlerRootView style={styles.sectionCard}>
+      <View style={styles.sectionCard}>
         {data.payload.length > 0 ? (
           data.payload.map((item) => (
             <View
@@ -168,7 +168,7 @@ export default function Page(): JSX.Element {
             <Text style={styles.noRecordsText}>You have no workouts yet</Text>
           </View>
         )}
-      </GestureHandlerRootView>
+      </View>
     </ScrollView>
   );
 }

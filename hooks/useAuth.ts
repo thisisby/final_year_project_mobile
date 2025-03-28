@@ -2,6 +2,7 @@ import {
   UseMutateFunction,
   useMutation,
   UseMutationResult,
+  useQuery,
   useQueryClient,
 } from "@tanstack/react-query";
 import {
@@ -67,6 +68,16 @@ export function useSignUp() {
         text1: "Error",
         text2: message,
       });
+    },
+  });
+}
+
+export function useMe() {
+  return useQuery({
+    queryKey: ["me"],
+    queryFn: getMe,
+    onSuccess: (data) => {
+      console.log("data", data);
     },
   });
 }

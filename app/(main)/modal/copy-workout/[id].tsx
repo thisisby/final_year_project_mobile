@@ -25,13 +25,11 @@ export default function Page() {
 
   const { data: workout, isLoading } = useGetWorkoutByID(Number(id));
   const { copyWorkout, isLoading: isCopyLoading } = useCopyWorkout();
-  const [isCopySuccess, setIsCopySuccess] = useState(false);
 
   console.log("iDDDDD", Number(id));
   const handleCopyWorkout = async () => {
     const res = await copyWorkout(Number(id));
-    console.log("res", res);
-    setIsCopySuccess(true);
+    navigation.goBack();
   };
 
   // Function to handle input focus
@@ -145,7 +143,7 @@ export default function Page() {
                     color: "#059669",
                   }}
                 >
-                  {isCopySuccess ? "Copied" : "Copy Workout"}
+                  Copy Workout
                 </Text>
               )}
             </TouchableOpacity>

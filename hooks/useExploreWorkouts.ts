@@ -16,7 +16,6 @@ export function useExploreWorkouts(searchQuery) {
     // Only refetch when searchQuery actually changes
     // This works with our debounced approach
     enabled: true,
-    staleTime: 1000 * 60 * 5, // 5 minutes
     onSuccess: (data) => {
       console.log("explore workouts fetched successfully");
     },

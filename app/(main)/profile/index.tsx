@@ -55,27 +55,8 @@ export default function Page() {
           Account
         </Text>
       </View>
-      <View style={styles.header}>
-        <View
-          style={{
-            backgroundColor: "#efefef",
-            width: 60,
-            aspectRatio: "1/1",
-            borderRadius: 100,
-            display: "flex",
-            justifyContent: "center",
-            alignItems: "center",
-          }}
-        >
-          <Text>{user.email.slice(0, 2).toUpperCase()}</Text>
-        </View>
-        <View>
-          <Text style={styles.headerHeading}>Baistan</Text>
-          <Text style={styles.headerName}>{user.email}</Text>
-        </View>
-      </View>
 
-      <View style={{ marginTop: 20 }}>
+      <View style={{}}>
         <TouchableOpacity
           style={{
             paddingVertical: 8,
@@ -89,17 +70,8 @@ export default function Page() {
             alignItems: "center",
             marginBottom: 8,
           }}
-          onPress={() => router.push(`/home/sessions/1`)}
+          onPress={() => router.push(`/profile/general`)}
         >
-          <View
-            style={{
-              padding: 4,
-              borderRadius: 6,
-              backgroundColor: "#f1f1f1",
-            }}
-          >
-            <TimerLinearIcon width={24} height={24} />
-          </View>
           <View>
             <Text style={styles.cardTitle}>General</Text>
             <Text style={{ fontSize: 12, color: "#666", marginTop: 2 }}>
@@ -122,15 +94,6 @@ export default function Page() {
           }}
           onPress={() => router.push(`/home/sessions/1`)}
         >
-          <View
-            style={{
-              padding: 4,
-              borderRadius: 6,
-              backgroundColor: "#f1f1f1",
-            }}
-          >
-            <TimerLinearIcon width={24} height={24} />
-          </View>
           <View>
             <Text style={styles.cardTitle}>Security</Text>
             <Text style={{ fontSize: 12, color: "#666", marginTop: 2 }}>
@@ -153,15 +116,6 @@ export default function Page() {
           }}
           onPress={() => router.push(`/home/sessions/1`)}
         >
-          <View
-            style={{
-              padding: 4,
-              borderRadius: 6,
-              backgroundColor: "#f1f1f1",
-            }}
-          >
-            <TimerLinearIcon width={24} height={24} />
-          </View>
           <View>
             <Text style={styles.cardTitle}>FAQ</Text>
             <Text style={{ fontSize: 12, color: "#666", marginTop: 2 }}>
@@ -184,15 +138,6 @@ export default function Page() {
           }}
           onPress={handleLogout}
         >
-          <View
-            style={{
-              padding: 4,
-              borderRadius: 6,
-              backgroundColor: "#fff",
-            }}
-          >
-            <TimerLinearIcon width={24} height={24} />
-          </View>
           <View>
             <Text style={[styles.cardTitle, { color: "#000" }]}>Log out</Text>
             <Text style={{ fontSize: 12, color: "#000", marginTop: 2 }}>
