@@ -5,8 +5,6 @@ export default function ProtectedLayout() {
   const { user } = useUserStore();
   const router = useRouter();
 
-  console.log(user);
-
   if (!user) {
     return <Redirect href="/(auth)/login" />;
   }

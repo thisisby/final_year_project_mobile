@@ -36,7 +36,6 @@ export default function Page() {
   const navigation = useNavigation();
   const { data: userData, isLoading } = useMe();
 
-  const [email, setEmail] = useState("");
   const [username, setUsername] = useState("");
   const [bio, setBio] = useState("");
   const [image, setImage] = useState(null);
@@ -44,14 +43,12 @@ export default function Page() {
   const scrollViewRef = useRef();
   const usernameInputRef = useRef();
   const bioInputRef = useRef();
-  const emailInputRef = useRef();
 
   const { changeAvatar, isLoading: isAvatarLoading } = useChangeAvatar();
   const { patchUser, isLoading: isPatchLoading } = usePatchUser();
 
   useEffect(() => {
     if (userData) {
-      setEmail(userData?.payload.email);
       setUsername(userData?.payload.username);
       setBio(userData?.payload.bio);
 
@@ -247,28 +244,6 @@ export default function Page() {
                 Keyboard.dismiss();
               }}
               onFocus={() => handleInputFocus(bioInputRef)}
-            />
-          </View>
-
-          <View>
-            <Text
-              style={{
-                marginBottom: 4,
-                marginLeft: 6,
-                fontWeight: "bold",
-              }}
-            >
-              Email
-            </Text>
-            <TextInput
-              ref={emailInputRef} // Attach ref
-              style={styles.input}
-              placeholder="Name"
-              placeholderTextColor="#999999"
-              value={email}
-              onChangeText={setEmail}
-              autoComplete="name"
-              onFocus={() => handleInputFocus(emailInputRef)}
             />
           </View>
 

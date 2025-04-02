@@ -168,7 +168,7 @@ export default function Page(): JSX.Element {
 
     setSelectedDate(localDate);
   };
-  console.log("Current Selected Date:", selectedDate);
+
   return (
     <ScrollView
       contentContainerStyle={{

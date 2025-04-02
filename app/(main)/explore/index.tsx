@@ -12,52 +12,50 @@ import {
   TextInput,
   ActivityIndicator,
   Animated,
+  Keyboard,
+  Platform,
+  TouchableWithoutFeedback,
 } from "react-native";
 
 export default function Page() {
   const [activeCategory, setActiveCategory] = useState("All");
-  const [isMasonryView, setIsMasonryView] = useState(true);
-  const [columnOne, setColumnOne] = useState([]);
-  const [columnTwo, setColumnTwo] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [debouncedSearchQuery, setDebouncedSearchQuery] = useState("");
   const [searchTimeout, setSearchTimeout] = useState(null);
+  const inputRef = useRef(null);
 
   // Animation references
   const fadeAnim = useRef(new Animated.Value(1)).current;
   const loaderFadeAnim = useRef(new Animated.Value(0)).current;
   const isSearching = useRef(false);
+  const scrollViewRef = useRef(null);
 
   const {
     data: workouts,
     isLoading,
     fetchNextPage,
-    refetch,
     isRefetching,
   } = useExploreWorkouts(debouncedSearchQuery);
 
+  // Extract all workouts from paginated data
+  const allWorkouts =
+    workouts?.pages?.flatMap((page) => page.payload.data) || [];
+
+  // Prepare masonry columns
+  const columnOne = allWorkouts.filter((_, index) => index % 2 === 0);
+  const columnTwo = allWorkouts.filter((_, index) => index % 2 !== 0);
+
   // Handle loader animation
   useEffect(() => {
-    if (isLoading || isRefetching) {
-      // Fade in loader
-      Animated.timing(loaderFadeAnim, {
-        toValue: 1,
-        duration: 300,
-        useNativeDriver: true,
-      }).start();
-    } else {
-      // Fade out loader
-      Animated.timing(loaderFadeAnim, {
-        toValue: 0,
-        duration: 300,
-        useNativeDriver: true,
-      }).start();
-    }
+    Animated.timing(loaderFadeAnim, {
+      toValue: isLoading || isRefetching ? 1 : 0,
+      duration: 300,
+      useNativeDriver: true,
+    }).start();
   }, [isLoading, isRefetching, loaderFadeAnim]);
 
-  // Reset columns when workouts data changes
+  // Fade in animation when new results are available
   useEffect(() => {
-    // Fade in when new results are available
     if (isSearching.current) {
       Animated.timing(fadeAnim, {
         toValue: 1,
@@ -67,15 +65,9 @@ export default function Page() {
         isSearching.current = false;
       });
     }
-
-    if (workouts && workouts.pages) {
-      const allWorkouts = workouts.pages.flatMap((page) => page.payload.data);
-      setColumnOne(allWorkouts.filter((_, index) => index % 2 === 0));
-      setColumnTwo(allWorkouts.filter((_, index) => index % 2 !== 0));
-    }
   }, [workouts, fadeAnim]);
 
-  // Debounce the search query with 500ms delay and trigger fade animation
+  // Debounce search query WITHOUT dismissing keyboard
   const handleSearchInputChange = useCallback(
     (text) => {
       setSearchQuery(text);
@@ -128,14 +120,38 @@ export default function Page() {
       }
 
       // Otherwise, set the search query to the category name
-      const categorySearchText = category;
-      setSearchQuery(categorySearchText);
-
-      // Trigger search immediately for category selection
-      setDebouncedSearchQuery(categorySearchText);
+      setSearchQuery(category);
+      setDebouncedSearchQuery(category);
     },
     [fadeAnim]
   );
+
+  // Clear search with animation
+  const handleClearSearch = useCallback(() => {
+    // Trigger fade out animation
+    if (!isSearching.current) {
+      isSearching.current = true;
+      Animated.timing(fadeAnim, {
+        toValue: 0.4,
+        duration: 200,
+        useNativeDriver: true,
+      }).start();
+    }
+
+    setSearchQuery("");
+    setDebouncedSearchQuery("");
+    setActiveCategory("All");
+
+    // Keep focus on input after clearing
+    if (inputRef.current) {
+      inputRef.current.focus();
+    }
+  }, [fadeAnim]);
+
+  // Function to dismiss keyboard
+  const dismissKeyboard = () => {
+    Keyboard.dismiss();
+  };
 
   // Clean up the timeout when component unmounts
   useEffect(() => {
@@ -160,180 +176,185 @@ export default function Page() {
     "Legs",
   ];
 
-  // Render the content for the data section
-  const renderContent = () => {
+  const isCloseToBottom = ({
+    layoutMeasurement,
+    contentOffset,
+    contentSize,
+  }) => {
+    const paddingToBottom = 20;
     return (
-      <View style={{ position: "relative", minHeight: 300 }}>
-        {/* Custom animated loader that shows during initial load or refetching */}
-        <Animated.View
-          style={[
-            styles.customLoaderContainer,
-            {
-              opacity: loaderFadeAnim,
-              zIndex: isLoading || isRefetching ? 10 : -1,
-            },
-          ]}
-          pointerEvents={isLoading || isRefetching ? "auto" : "none"}
-        >
-          <View style={styles.customLoader}>
-            <ActivityIndicator size="small" color="#6371f6" />
-            <Text style={styles.loaderText}>
-              {isLoading ? "Loading workouts..." : "Updating results..."}
-            </Text>
-          </View>
-        </Animated.View>
-
-        <Animated.View style={[styles.masonryContainer, { opacity: fadeAnim }]}>
-          <View style={styles.masonryColumn}>
-            {columnOne.map((workout) => (
-              <TouchableOpacity
-                onPress={() => router.push(`/modal/copy-workout/${workout.id}`)}
-                key={workout.id}
-                style={styles.workoutItem}
-              >
-                <Text style={styles.workoutTitle}>{workout.title}</Text>
-                <View style={{ flexShrink: 1 }}>
-                  <Text
-                    style={styles.workoutDescription}
-                    numberOfLines={3}
-                    ellipsizeMode="tail"
-                  >
-                    {workout?.description || "No description available"}
-                  </Text>
-                </View>
-              </TouchableOpacity>
-            ))}
-          </View>
-
-          <View style={styles.masonryColumn}>
-            {columnTwo.map((workout) => (
-              <TouchableOpacity
-                onPress={() => router.push(`/modal/copy-workout/${workout.id}`)}
-                key={workout.id}
-                style={styles.workoutItem}
-              >
-                <Text style={styles.workoutTitle}>{workout.title}</Text>
-                <View style={{ flexShrink: 1 }}>
-                  <Text
-                    style={styles.workoutDescription}
-                    numberOfLines={3}
-                    ellipsizeMode="tail"
-                  >
-                    {workout?.description || "No description available"}
-                  </Text>
-                </View>
-              </TouchableOpacity>
-            ))}
-          </View>
-
-          {/* No results message */}
-          {workouts &&
-            workouts.pages &&
-            workouts.pages[0]?.payload?.data?.length === 0 && (
-              <View style={styles.noResultsContainer}>
-                <Text style={styles.noResultsText}>No workouts found</Text>
-              </View>
-            )}
-        </Animated.View>
-      </View>
+      layoutMeasurement.height + contentOffset.y >=
+      contentSize.height - paddingToBottom
     );
   };
 
-  return (
-    <ScrollView
-      contentContainerStyle={styles.scrollContainer}
-      style={styles.container}
-      onScroll={({ nativeEvent }) => {
-        if (isCloseToBottom(nativeEvent)) {
-          handleLoadMore();
-        }
+  // Render a workout card component
+  const WorkoutCard = ({ workout }) => (
+    <TouchableOpacity
+      onPress={() => {
+        // Manually dismiss keyboard before navigation to avoid React Native issues
+        Keyboard.dismiss();
+        router.push(`/modal/copy-workout/${workout.id}`);
       }}
-      scrollEventThrottle={400}
+      style={styles.workoutItem}
     >
-      <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
-        <Text style={styles.title}>Explore</Text>
+      <Text style={styles.workoutTitle}>{workout.title}</Text>
+      <View style={{ flexShrink: 1 }}>
+        <Text
+          style={styles.workoutDescription}
+          numberOfLines={3}
+          ellipsizeMode="tail"
+        >
+          {workout?.description || "No description available"}
+        </Text>
       </View>
+    </TouchableOpacity>
+  );
 
-      {/* Search Input */}
-      <View style={styles.searchContainer}>
-        <TextInput
-          placeholder="Search: e.g. Push-ups, Squats, etc."
-          placeholderTextColor="#999999"
-          style={styles.searchInput}
-          value={searchQuery}
-          onChangeText={handleSearchInputChange}
-        />
-        {searchQuery.length > 0 && (
-          <TouchableOpacity
-            style={styles.clearButton}
-            onPress={() => {
-              // Trigger fade out animation
-              if (!isSearching.current) {
-                isSearching.current = true;
-                Animated.timing(fadeAnim, {
-                  toValue: 0.4,
-                  duration: 200,
-                  useNativeDriver: true,
-                }).start();
-              }
-
-              setSearchQuery("");
-              setDebouncedSearchQuery("");
-              setActiveCategory("All");
-            }}
+  return (
+    <TouchableWithoutFeedback onPress={dismissKeyboard}>
+      <View style={styles.mainContainer}>
+        <View style={styles.headerContainer}>
+          <View
+            style={{ flexDirection: "row", justifyContent: "space-between" }}
           >
-            <Text style={styles.clearButtonText}>✕</Text>
-          </TouchableOpacity>
-        )}
-      </View>
+            <Text style={styles.title}>Explore</Text>
+          </View>
 
-      {/* Horizontal Scroll for Categories */}
-      <ScrollView
-        horizontal
-        showsHorizontalScrollIndicator={false}
-        style={styles.categoryContainer}
-      >
-        {categories.map((category) => (
-          <TouchableOpacity
-            key={category}
-            style={[
-              styles.categoryItem,
-              activeCategory === category && styles.activeCategory,
-            ]}
-            onPress={() => handleCategoryPress(category)}
+          {/* Search Input */}
+          <View style={styles.searchContainer}>
+            <TextInput
+              ref={inputRef}
+              placeholder="Search: e.g. Push-ups, Squats, etc."
+              placeholderTextColor="#999999"
+              style={styles.searchInput}
+              value={searchQuery}
+              onChangeText={handleSearchInputChange}
+              returnKeyType="search"
+              clearButtonMode="while-editing" // iOS only clear button
+              // Modified these props to allow unfocus
+              autoCapitalize="none"
+              autoCorrect={false}
+              blurOnSubmit={true}
+            />
+            {searchQuery.length > 0 && (
+              <TouchableOpacity
+                style={styles.clearButton}
+                onPress={handleClearSearch}
+              >
+                <Text style={styles.clearButtonText}>✕</Text>
+              </TouchableOpacity>
+            )}
+          </View>
+
+          {/* Horizontal Scroll for Categories */}
+          <ScrollView
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            style={styles.categoryContainer}
+            keyboardShouldPersistTaps="handled" // Changed from "always" to "handled"
+            contentContainerStyle={styles.categoryContentContainer}
           >
-            <Text
+            {categories.map((category) => (
+              <TouchableOpacity
+                key={category}
+                style={[
+                  styles.categoryItem,
+                  activeCategory === category && styles.activeCategory,
+                ]}
+                onPress={() => handleCategoryPress(category)}
+              >
+                <Text
+                  style={[
+                    styles.categoryText,
+                    activeCategory === category && styles.activeCategoryText,
+                  ]}
+                >
+                  {category}
+                </Text>
+              </TouchableOpacity>
+            ))}
+          </ScrollView>
+        </View>
+
+        <ScrollView
+          ref={scrollViewRef}
+          contentContainerStyle={{ ...styles.scrollContainer, flexGrow: 1 }} // Added flexGrow: 1
+          style={styles.container}
+          onScroll={({ nativeEvent }) => {
+            if (isCloseToBottom(nativeEvent)) {
+              handleLoadMore();
+            }
+          }}
+          scrollEventThrottle={400}
+          keyboardShouldPersistTaps="handled"
+          keyboardDismissMode="on-drag"
+        >
+          {/* Content with loading and results */}
+          <View style={{ position: "relative", minHeight: 300 }}>
+            {/* Custom animated loader */}
+            <Animated.View
               style={[
-                styles.categoryText,
-                activeCategory === category && styles.activeCategoryText,
+                styles.customLoaderContainer,
+                {
+                  opacity: loaderFadeAnim,
+                  zIndex: isLoading || isRefetching ? 10 : -1,
+                },
               ]}
+              pointerEvents={isLoading || isRefetching ? "auto" : "none"}
             >
-              {category}
-            </Text>
-          </TouchableOpacity>
-        ))}
-      </ScrollView>
+              <View style={styles.customLoader}>
+                <ActivityIndicator size="small" color="#6371f6" />
+                <Text style={styles.loaderText}>
+                  {isLoading ? "Loading workouts..." : "Updating results..."}
+                </Text>
+              </View>
+            </Animated.View>
 
-      {/* Render content section with proper loading states */}
-      {renderContent()}
-    </ScrollView>
+            <Animated.View
+              style={[styles.masonryContainer, { opacity: fadeAnim }]}
+            >
+              {/* First column */}
+              <View style={styles.masonryColumn}>
+                {columnOne.map((workout) => (
+                  <WorkoutCard key={workout.id} workout={workout} />
+                ))}
+              </View>
+
+              {/* Second column */}
+              <View style={styles.masonryColumn}>
+                {columnTwo.map((workout) => (
+                  <WorkoutCard key={workout.id} workout={workout} />
+                ))}
+              </View>
+
+              {/* No results message */}
+              {allWorkouts.length === 0 && !isLoading && (
+                <View style={styles.noResultsContainer}>
+                  <Text style={styles.noResultsText}>No workouts found</Text>
+                </View>
+              )}
+            </Animated.View>
+          </View>
+        </ScrollView>
+      </View>
+    </TouchableWithoutFeedback>
   );
 }
 
-const isCloseToBottom = ({ layoutMeasurement, contentOffset, contentSize }) => {
-  const paddingToBottom = 20;
-  return (
-    layoutMeasurement.height + contentOffset.y >=
-    contentSize.height - paddingToBottom
-  );
-};
-
-// Updated styles
+// Styles
 const styles = StyleSheet.create({
-  container: {
+  mainContainer: {
     flex: 1,
+  },
+  headerContainer: {
     paddingHorizontal: 20,
     paddingTop: 20,
+    backgroundColor: "white",
+    zIndex: 10,
+  },
+  container: {
+    paddingHorizontal: 20,
   },
   scrollContainer: {
     paddingBottom: 130,
@@ -370,6 +391,9 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     marginBottom: 16,
   },
+  categoryContentContainer: {
+    paddingRight: 20,
+  },
   categoryItem: {
     paddingVertical: 8,
     paddingHorizontal: 15,
@@ -397,8 +421,7 @@ const styles = StyleSheet.create({
     top: 0,
     left: 0,
     right: 0,
-    height: 100,
-    justifyContent: "center",
+    height: 400,
     alignItems: "center",
     backgroundColor: "rgba(255, 255, 255, 0.8)",
     zIndex: 10,
@@ -410,12 +433,13 @@ const styles = StyleSheet.create({
     backgroundColor: "white",
     paddingVertical: 12,
     paddingHorizontal: 20,
-    borderRadius: 50,
+    borderRadius: 10,
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 4,
     elevation: 3,
+    marginTop: 40,
   },
   loaderText: {
     marginLeft: 10,

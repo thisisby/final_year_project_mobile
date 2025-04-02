@@ -26,7 +26,6 @@ export default function Page() {
   const { data: workout, isLoading } = useGetWorkoutByID(Number(id));
   const { copyWorkout, isLoading: isCopyLoading } = useCopyWorkout();
 
-  console.log("iDDDDD", Number(id));
   const handleCopyWorkout = async () => {
     const res = await copyWorkout(Number(id));
     navigation.goBack();

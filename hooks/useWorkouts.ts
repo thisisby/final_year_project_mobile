@@ -15,9 +15,7 @@ export function useWorkouts() {
   const { user } = useUserStore();
 
   return useQuery(["workouts"], () => getWorkouts(user?.id ?? 0), {
-    onSuccess: (data) => {
-      console.log("workouts", data);
-    },
+    onSuccess: (data) => {},
     onError: (error) => {
       console.error("workouts error", error);
     },
@@ -28,7 +26,6 @@ export function useCreateWorkout() {
   const mutation = useMutation(createWorkout, {
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ["workouts"] });
-      console.log("workout created", data);
     },
     onError: (error) => {
       console.error("workout create error", error);
@@ -45,7 +42,6 @@ export function useDeleteWorkout() {
   const mutation = useMutation(deleteWorkout, {
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ["workouts"] });
-      console.log("workout deleted", data);
     },
     onError: (error) => {
       console.error("workout delete error", error);
@@ -63,8 +59,6 @@ export function usePatchWorkout() {
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ["workouts"] });
       queryClient.invalidateQueries({ queryKey: ["explore-workout-by-id"] });
-
-      console.log("workout patched", data);
     },
     onError: (error) => {
       console.error("workout patch error", error);
@@ -82,7 +76,6 @@ export function useCopyWorkout() {
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ["workouts"] });
       queryClient.invalidateQueries({ queryKey: ["explore-workout-by-id"] });
-      console.log("workout copied", data);
     },
     onError: (error) => {
       console.error("workout copy error", error);
@@ -99,9 +92,7 @@ export function useGetWorkoutByID(id: number) {
   return useQuery({
     queryKey: ["explore-workout-by-id", id],
     queryFn: () => getWorkoutByID(id),
-    onSuccess: (data) => {
-      console.log("explore workout by id", data);
-    },
+    onSuccess: (data) => {},
     onError: (error) => {
       console.error("explore workout by id error", error);
     },
@@ -112,9 +103,7 @@ export function useFindAllWorkoutsByUserID(userID: number) {
   return useQuery({
     queryKey: ["user-workouts", userID],
     queryFn: () => findAllWorkoutsByUserID(userID),
-    onSuccess: (data) => {
-      console.log("user workouts", data);
-    },
+    onSuccess: (data) => {},
     onError: (error) => {
       console.error("user workouts error", error);
     },

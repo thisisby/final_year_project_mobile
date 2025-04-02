@@ -45,8 +45,6 @@ export default function Page() {
     );
   }
 
-  console.log("data");
-
   return (
     <ScrollView
       contentContainerStyle={{ paddingBottom: 130 }}
@@ -56,7 +54,7 @@ export default function Page() {
         <Avatar title={user.email} />
         <View>
           <Text style={styles.headerHeading}>Good Morning!</Text>
-          <Text style={styles.headerName}>{user.email}</Text>
+          <Text style={styles.headerName}>{user.username}</Text>
         </View>
       </View>
 

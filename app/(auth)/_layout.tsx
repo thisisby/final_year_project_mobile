@@ -6,8 +6,6 @@ import toastConfig from "@/components/common/CustomToast";
 export default function PublicLayout() {
   const { user } = useUserStore();
 
-  console.log(user);
-
   if (user) {
     return <Redirect href="/(main)/home" />;
   }

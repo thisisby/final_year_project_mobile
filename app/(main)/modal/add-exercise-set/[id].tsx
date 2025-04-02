@@ -34,7 +34,6 @@ export default function Page(): JSX.Element {
 
   const { id } = useLocalSearchParams();
 
-  console.log(reps);
   const [name, setName] = useState("");
   const [value, setValue] = useState("");
 

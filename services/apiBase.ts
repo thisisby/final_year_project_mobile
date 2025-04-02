@@ -5,7 +5,7 @@ import { useUserStore } from "@/store/userStore";
 import { router } from "expo-router";
 
 // const BASE_URL = "http://3.87.183.239/api/v1";
-const BASE_URL = `http://192.168.0.238:8080/api/v1`;
+const BASE_URL = `http://192.168.0.207:8080/api/v1`;
 
 const api = axios.create({
   baseURL: BASE_URL,
@@ -16,7 +16,6 @@ api.interceptors.response.use(
   (response) => response,
   async (error) => {
     if (error.response?.status === 401) {
-      console.log("Unauthorized - redirecting to login");
       const clearUser = useUserStore.getState().clearUser;
 
       await AsyncStorage.removeItem("jwtToken");

@@ -5,6 +5,7 @@ import { createJSONStorage, persist } from "zustand/middleware";
 interface IUser {
   id: number;
   email: string;
+  username: string;
 }
 
 type State = {

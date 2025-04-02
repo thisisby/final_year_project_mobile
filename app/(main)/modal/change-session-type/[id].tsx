@@ -45,9 +45,6 @@ export default function Page(): JSX.Element {
     });
   };
 
-  console.log(activities);
-  console.log(session);
-
   const handleAddCustomExercise = () => {};
   return (
     <View style={styles.container}>

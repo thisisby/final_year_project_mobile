@@ -32,7 +32,6 @@ export const usePatchUser = () => {
     },
     onError: (error) => {
       const msg = error?.response?.data?.message.split(" ");
-      console.log("msggg: ", msg);
 
       if (msg.includes("exists")) {
         Toast.show({
@@ -66,12 +65,8 @@ export function useExploreUsers(searchQuery) {
     // Only refetch when searchQuery actually changes
     // This works with our debounced approach
     enabled: true,
-    onSuccess: (data) => {
-      console.log("explore users fetched successfully");
-    },
-    onError: (error) => {
-      console.error("explore users error", error);
-    },
+    onSuccess: (data) => {},
+    onError: (error) => {},
   });
 }
 
@@ -79,9 +74,7 @@ export function useGetUserByID(id: number) {
   return useQuery({
     queryKey: ["explore-user-by-id", id],
     queryFn: () => getUserById(id),
-    onSuccess: (data) => {
-      console.log("explore user by id", data);
-    },
+    onSuccess: (data) => {},
     onError: (error) => {
       console.error("explore user by id error", error);
     },

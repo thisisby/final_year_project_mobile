@@ -66,8 +66,6 @@ export default function Page(): JSX.Element {
       workoutExercises: selectedExercises,
     };
 
-    console.log("newWorkout", newWorkout); // Log the new workout data
-
     if (selectedExercises.length === 0) {
       return;
     }
@@ -90,7 +88,6 @@ export default function Page(): JSX.Element {
 
     try {
       const newExercise = await createCustomExercise({ name: search });
-      console.log("Created exercise:ssss", newExercise); // Now this should definitely log the data
       const updatedExerciseLists = [
         { id: newExercise.payload.id, name: search },
         ...exerciseLists,
@@ -122,11 +119,18 @@ export default function Page(): JSX.Element {
     setExerciseLists(uniqueExercises);
   }, [exercisesData, myExercisesData]);
 
-  console.log("selected", selectedExercises);
-
   const filteredExercises = exerciseLists.filter((item) =>
     item.name.toLowerCase().includes(search.toLowerCase())
   );
+
+  if (isExercisesLoading || isMyExercisesLoading) {
+    return (
+      <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
+        <ActivityIndicator size="large" color="#0000ff" />
+      </View>
+    );
+  }
+
   return (
     <View style={styles.container}>
       <ScrollView

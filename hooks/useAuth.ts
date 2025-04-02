@@ -23,7 +23,6 @@ export function useSignIn() {
 
   return useMutation(login, {
     onSuccess: async (data) => {
-      console.log("ddd", data.payload.access_token);
       await AsyncStorage.setItem("jwtToken", data.payload.access_token);
 
       const userData = await getMe(data.payload.access_token);
@@ -51,7 +50,6 @@ export function useSignUp() {
 
   return useMutation(signup, {
     onSuccess: async (data) => {
-      console.log("ddd", data.payload.access_token);
       await AsyncStorage.setItem("jwtToken", data.payload.access_token);
 
       const userData = await getMe(data.payload.access_token);
@@ -76,8 +74,6 @@ export function useMe() {
   return useQuery({
     queryKey: ["me"],
     queryFn: getMe,
-    onSuccess: (data) => {
-      console.log("data", data);
-    },
+    onSuccess: (data) => {},
   });
 }

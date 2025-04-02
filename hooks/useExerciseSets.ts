@@ -1,14 +1,15 @@
 import { queryClient } from "@/app/_layout";
-import { createExerciseSet, getExerciseSets } from "@/services/workoutExerciseSetService";
+import {
+  createExerciseSet,
+  getExerciseSets,
+} from "@/services/workoutExerciseSetService";
 import { getWorkouts } from "@/services/workoutsService";
 import { useUserStore } from "@/store/userStore";
 import { useMutation, useQuery } from "@tanstack/react-query";
 
 export function useExerciseSets(exerciseID: number) {
   return useQuery(["exercise-sets"], () => getExerciseSets(exerciseID), {
-    onSuccess: (data) => {
-      console.log("exercise Sets", data);
-    },
+    onSuccess: (data) => {},
     onError: (error) => {
       console.error("workouts error", error);
     },
@@ -19,7 +20,6 @@ export function useCreateExerciseSet() {
   const mutation = useMutation(createExerciseSet, {
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ["exercise-sets"] });
-      console.log("exercise set created", data);
     },
   });
 

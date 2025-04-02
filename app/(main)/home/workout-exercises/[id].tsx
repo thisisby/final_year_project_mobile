@@ -51,7 +51,6 @@ export default function Page(): JSX.Element {
     if (workoutData && !isWorkoutLoading) {
       workoutData.payload.forEach((workout) => {
         workout.exercises.forEach((exercise) => {
-          console.log(exercise);
           if (exercise.id === Number(id)) {
             setCurrentExercise({
               ...exercise.exercise,

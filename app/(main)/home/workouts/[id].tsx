@@ -107,7 +107,6 @@ export default function Page(): JSX.Element {
     Number(id)
   );
   const handleDelete = async (id: number) => {
-    console.log("Deleted item with id:", id);
     await deleteWorkout(id);
     navigation.goBack();
   };

@@ -34,8 +34,6 @@ export default function Page(): JSX.Element {
   const { deleteWorkout, isLoading: isDeleteLoading } = useDeleteWorkout();
 
   const handleDelete = (id: number) => {
-    // Implement your delete logic here
-    console.log("Deleted item with id:", id);
     deleteWorkout(id);
   };
 

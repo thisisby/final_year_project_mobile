@@ -12,7 +12,7 @@ export function useDeleteWorkoutExercise() {
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ["workouts"] });
       queryClient.invalidateQueries({ queryKey: ["explore-workout-by-id"] });
-      console.log("workout exercise deleted", data);
+      "workout exercise deleted", data;
     },
   });
 
@@ -27,8 +27,6 @@ export function usePatchWorkoutExercise() {
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ["workouts"] });
       queryClient.invalidateQueries({ queryKey: ["explore-workout-by-id"] });
-
-      console.log("workout exercise patched", data);
     },
   });
 
@@ -43,7 +41,6 @@ export function useAddWorkoutExercise() {
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ["workouts"] });
       queryClient.invalidateQueries({ queryKey: ["explore-workout-by-id"] });
-      console.log("workout exercise added", data);
     },
   });
 
@@ -55,9 +52,7 @@ export function useAddWorkoutExercise() {
 
 export function useGetWorkoutExerciseByID(id: number) {
   return useQuery(["workout-exercise", id], () => getWorkoutExerciseByID(id), {
-    onSuccess: (data) => {
-      console.log("workout exercise", data);
-    },
+    onSuccess: (data) => {},
     onError: (error) => {
       console.error("workout exercise error", error);
     },

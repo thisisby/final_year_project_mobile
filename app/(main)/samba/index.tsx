@@ -14,6 +14,8 @@ import {
   ActivityIndicator,
   Animated,
   ImageBackground,
+  TouchableWithoutFeedback,
+  Keyboard,
 } from "react-native";
 
 export default function Page() {
@@ -146,7 +148,11 @@ export default function Page() {
             {columnOne.map((workout, idx) => (
               <TouchableOpacity
                 key={idx}
-                onPress={() => router.push(`/samba/user-profile/${workout.id}`)}
+                onPress={() => {
+                  // Manually dismiss keyboard before navigation to avoid React Native issues
+                  Keyboard.dismiss();
+                  router.push(`/samba/user-profile/${workout.id}`);
+                }}
                 style={styles.workoutItem}
               >
                 <View
@@ -264,57 +270,87 @@ export default function Page() {
       </View>
     );
   };
+  const dismissKeyboard = () => {
+    Keyboard.dismiss();
+  };
 
+  const inputRef = useRef(null);
   return (
-    <ScrollView
-      contentContainerStyle={styles.scrollContainer}
-      style={styles.container}
-      onScroll={({ nativeEvent }) => {
-        if (isCloseToBottom(nativeEvent)) {
-          handleLoadMore();
-        }
-      }}
-      scrollEventThrottle={400}
-    >
-      <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
-        <Text style={styles.title}>Explore People</Text>
-      </View>
-
-      {/* Search Input */}
-      <View style={styles.searchContainer}>
-        <TextInput
-          placeholder="Search: John Doe, Fitness Trainer..."
-          placeholderTextColor="#999999"
-          style={styles.searchInput}
-          value={searchQuery}
-          onChangeText={handleSearchInputChange}
-        />
-        {searchQuery.length > 0 && (
-          <TouchableOpacity
-            style={styles.clearButton}
-            onPress={() => {
-              // Trigger fade out animation
-              if (!isSearching.current) {
-                isSearching.current = true;
-                Animated.timing(fadeAnim, {
-                  toValue: 0.4,
-                  duration: 200,
-                  useNativeDriver: true,
-                }).start();
-              }
-
-              setSearchQuery("");
-              setDebouncedSearchQuery("");
-            }}
+    <TouchableWithoutFeedback onPress={dismissKeyboard}>
+      <View style={styles.mainContainer}>
+        <View
+          style={{
+            paddingHorizontal: 20,
+            paddingTop: 20,
+          }}
+        >
+          <View
+            style={{ flexDirection: "row", justifyContent: "space-between" }}
           >
-            <Text style={styles.clearButtonText}>✕</Text>
-          </TouchableOpacity>
-        )}
-      </View>
+            <Text style={styles.title}>Explore People</Text>
+          </View>
 
-      {/* Render content section with proper loading states */}
-      {renderContent()}
-    </ScrollView>
+          {/* Search Input */}
+          <View style={styles.searchContainer}>
+            <TextInput
+              ref={inputRef}
+              placeholder="Search: John Doe, Fitness Trainer..."
+              placeholderTextColor="#999999"
+              style={styles.searchInput}
+              value={searchQuery}
+              onChangeText={handleSearchInputChange}
+              returnKeyType="search"
+              clearButtonMode="while-editing"
+              autoCapitalize="none"
+              autoCorrect={false}
+              blurOnSubmit={true}
+            />
+            {searchQuery.length > 0 && (
+              <TouchableOpacity
+                style={styles.clearButton}
+                onPress={() => {
+                  // Trigger fade out animation
+                  if (!isSearching.current) {
+                    isSearching.current = true;
+                    Animated.timing(fadeAnim, {
+                      toValue: 0.4,
+                      duration: 200,
+                      useNativeDriver: true,
+                    }).start();
+                  }
+
+                  setSearchQuery("");
+                  setDebouncedSearchQuery("");
+
+                  // Keep focus on input after clearing
+                  if (inputRef.current) {
+                    inputRef.current.focus();
+                  }
+                }}
+              >
+                <Text style={styles.clearButtonText}>✕</Text>
+              </TouchableOpacity>
+            )}
+          </View>
+        </View>
+
+        <ScrollView
+          contentContainerStyle={styles.scrollContainer}
+          style={styles.container}
+          onScroll={({ nativeEvent }) => {
+            if (isCloseToBottom(nativeEvent)) {
+              handleLoadMore();
+            }
+          }}
+          scrollEventThrottle={400}
+          keyboardShouldPersistTaps="handled"
+          keyboardDismissMode="on-drag"
+        >
+          {/* Render content section with proper loading states */}
+          {renderContent()}
+        </ScrollView>
+      </View>
+    </TouchableWithoutFeedback>
   );
 }
 
@@ -331,7 +367,6 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     paddingHorizontal: 20,
-    paddingTop: 20,
   },
   scrollContainer: {
     paddingBottom: 130,
@@ -340,6 +375,9 @@ const styles = StyleSheet.create({
     fontWeight: "800",
     fontSize: 20,
     marginBottom: 20,
+  },
+  mainContainer: {
+    flex: 1,
   },
   searchContainer: {
     flexDirection: "row",

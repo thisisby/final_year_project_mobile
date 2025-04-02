@@ -16,9 +16,7 @@ export function useExploreWorkouts(searchQuery) {
     // Only refetch when searchQuery actually changes
     // This works with our debounced approach
     enabled: true,
-    onSuccess: (data) => {
-      console.log("explore workouts fetched successfully");
-    },
+    onSuccess: (data) => {},
     onError: (error) => {
       console.error("explore workouts error", error);
     },

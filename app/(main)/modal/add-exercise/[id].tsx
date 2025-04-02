@@ -89,7 +89,6 @@ export default function Page(): JSX.Element {
     if (!isLoading && data) {
       const workout = data.payload.find((item) => item.id === Number(id));
 
-      console.log("workout", workout);
       workout.exercises.forEach((ex) => {
         setSelectedExercises((prevSelectedExercises) => [
           ex.exercise.id,
@@ -98,8 +97,6 @@ export default function Page(): JSX.Element {
       });
     }
   }, [exercisesData, myExercisesData, isLoading, data]);
-
-  console.log("selected", selectedExercises);
 
   const filteredExercises = exerciseLists.filter((item) =>
     item.name.toLowerCase().includes(search.toLowerCase())

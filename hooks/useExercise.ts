@@ -11,8 +11,9 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 export function useCreateCustomExercise() {
   const mutation = useMutation(createCustomExercise, {
     onSuccess: (data) => {
-      queryClient.invalidateQueries({ queryKey: ["my-exercises", "exercises", "workouts"] });
-      console.log("exercise Created", data);
+      queryClient.invalidateQueries({
+        queryKey: ["my-exercises", "exercises", "workouts"],
+      });
     },
     onError: (error) => {
       console.error("exercise create error", error);
@@ -24,9 +25,7 @@ export function useCreateCustomExercise() {
 
 export function useExercises() {
   return useQuery(["exercises"], getExercises, {
-    onSuccess: (data) => {
-      console.log("exercises", data);
-    },
+    onSuccess: (data) => {},
     onError: (error) => {
       console.error("exercises error", error);
     },
@@ -37,9 +36,7 @@ export function useMyExercises() {
   const { user } = useUserStore();
 
   return useQuery(["my-exercises"], () => getMyExercises(user?.id ?? 0), {
-    onSuccess: (data) => {
-      console.log("my exercises", data);
-    },
+    onSuccess: (data) => {},
     onError: (error) => {
       console.error("my exercises error", error);
     },
