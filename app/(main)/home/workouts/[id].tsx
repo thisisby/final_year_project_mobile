@@ -47,55 +47,6 @@ interface ExerciseListItem {
   description?: string;
 }
 
-const exerciseLists: ExerciseListItem[] = [
-  { id: "1", title: "My Exercises", count: 29 },
-  { id: "2", title: "Wednesday: Full-Body Workout", count: 7 },
-  {
-    id: "3",
-    title: "Squat",
-    count: 3,
-    description: "1 x 5 reps \n4 x 6 reps \nRest: 3 minutes",
-  },
-  {
-    id: "4",
-    title: "Arnold’s Golden Six",
-    count: 6,
-    description: "Do 3 sets of 6 reps for each exercise",
-  },
-  { id: "5", title: "Friday: Full-Body Workout", count: 7 },
-  {
-    id: "6",
-    title: "Bench Press",
-    count: 7,
-    description: "Do 3 sets of 6 reps for each exercise \nRest: 3 minutes",
-  },
-  {
-    id: "7",
-    title: "Monday: Full-Body Workout",
-    count: 7,
-    description: "Designed for beginners with gym access",
-  },
-  {
-    id: "8",
-    title: "Monday: Full-Body Workout",
-    count: 7,
-    description: "Designed for beginners with gym access",
-  },
-  {
-    id: "10",
-    title: "Monday: Full-Body Workout",
-    count: 7,
-    description: "Designed for beginners with gym access",
-  },
-  {
-    id: "9",
-    title: "Monday: Full-Body Workout",
-    count: 7,
-    description:
-      "Designed for beginners with gym access. Designed for beginners with gym access. Designed for beginners",
-  },
-];
-
 export default function Page(): JSX.Element {
   const navigation = useNavigation();
   const router = useRouter();
@@ -140,7 +91,7 @@ export default function Page(): JSX.Element {
         <>
           <View style={styles.header}>
             <TouchableOpacity onPress={() => navigation.goBack()}>
-              <ArrowSquareLeftIcon width={30} height={30} />
+              <ArrowSquareLeftIcon width={34} height={34} />
             </TouchableOpacity>
             <View>
               <Text style={styles.headerHeading}>
@@ -150,9 +101,9 @@ export default function Page(): JSX.Element {
             <View>
               <TouchableOpacity onPress={toggleDropdown}>
                 {isDropdownVisible ? (
-                  <CloseSquareIcon width={30} height={30} />
+                  <CloseSquareIcon width={34} height={34} />
                 ) : (
-                  <SettingLinearIcon width={30} height={30} />
+                  <SettingLinearIcon width={34} height={34} />
                 )}
               </TouchableOpacity>
             </View>
@@ -331,12 +282,13 @@ const styles = StyleSheet.create({
   },
   // Sticky Header
   header: {
+    height: 60,
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
     backgroundColor: "white",
     marginBottom: 20,
-    marginTop: 20,
+    marginTop: 10,
     position: "relative",
   },
   headerTitle: { fontSize: 18, fontWeight: "bold" },
@@ -449,9 +401,9 @@ const styles = StyleSheet.create({
     padding: 14,
   },
   headerHeading: {
-    fontWeight: 700,
-    fontSize: 16,
-    textAlign: "center",
+    fontWeight: 900,
+    fontSize: 18,
+    textTransform: "uppercase",
   },
   headerName: {
     color: "#898989",

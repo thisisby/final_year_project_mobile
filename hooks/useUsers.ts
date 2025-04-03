@@ -8,6 +8,7 @@ import {
 import { useMutation, useQuery } from "@tanstack/react-query";
 import Toast from "react-native-toast-message";
 import { useInfiniteQuery } from "@tanstack/react-query";
+import { useUserStore } from "@/store/userStore";
 
 export const useChangeAvatar = () => {
   const mutation = useMutation(changeAvatar, {
@@ -27,8 +28,9 @@ export const useChangeAvatar = () => {
 
 export const usePatchUser = () => {
   const mutation = useMutation(patchUser, {
-    onSuccess: () => {
+    onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ["me"] });
+      return data?.payload;
     },
     onError: (error) => {
       const msg = error?.response?.data?.message.split(" ");

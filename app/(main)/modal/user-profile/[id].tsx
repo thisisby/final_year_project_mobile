@@ -31,7 +31,7 @@ export default function Page() {
       >
         <View style={styles.header}>
           <TouchableOpacity onPress={() => navigation.goBack()}>
-            <CloseSquareIcon width={36} height={36} />
+            <CloseSquareIcon width={34} height={34} />
           </TouchableOpacity>
 
           <View>
@@ -288,8 +288,8 @@ const styles = StyleSheet.create({
   },
 
   headerHeading: {
-    fontWeight: 700,
-    fontSize: 16,
-    textAlign: "center",
+    fontWeight: 900,
+    fontSize: 18,
+    textTransform: "uppercase",
   },
 });

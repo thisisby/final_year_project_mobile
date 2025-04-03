@@ -81,7 +81,7 @@ export default function Page(): JSX.Element {
             </TouchableOpacity>
           ) : (
             <TouchableOpacity onPress={() => setStage(1)}>
-              <ArrowSquareLeftIcon width={36} height={36} />
+              <ArrowSquareLeftIcon width={34} height={34} />
             </TouchableOpacity>
           )}
 
@@ -211,9 +211,9 @@ const styles = StyleSheet.create({
     marginTop: 10,
   },
   headerHeading: {
-    fontWeight: "700",
-    fontSize: 16,
-    textAlign: "right",
+    fontWeight: 900,
+    fontSize: 18,
+    textTransform: "uppercase",
   },
   headerName: {
     color: "#898989",

@@ -239,9 +239,9 @@ export default function Page(): JSX.Element {
           onPress={stage === 1 ? () => navigation.goBack() : () => setStage(1)}
         >
           {stage === 1 ? (
-            <CloseSquareIcon width={36} height={36} />
+            <CloseSquareIcon width={34} height={34} />
           ) : (
-            <ArrowSquareLeftIcon width={36} height={36} />
+            <ArrowSquareLeftIcon width={34} height={34} />
           )}
         </TouchableOpacity>
 
@@ -400,9 +400,9 @@ const styles = StyleSheet.create({
     marginTop: 10,
   },
   headerHeading: {
-    fontWeight: "700",
-    fontSize: 16,
-    textAlign: "right",
+    fontWeight: 900,
+    fontSize: 18,
+    textTransform: "uppercase",
   },
   headerName: {
     color: "#898989",

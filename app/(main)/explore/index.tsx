@@ -218,7 +218,7 @@ export default function Page() {
           <View
             style={{ flexDirection: "row", justifyContent: "space-between" }}
           >
-            <Text style={styles.title}>Explore</Text>
+            <Text style={styles.title}>Explore Workouts</Text>
           </View>
 
           {/* Search Input */}
@@ -304,10 +304,10 @@ export default function Page() {
               pointerEvents={isLoading || isRefetching ? "auto" : "none"}
             >
               <View style={styles.customLoader}>
-                <ActivityIndicator size="small" color="#6371f6" />
-                <Text style={styles.loaderText}>
-                  {isLoading ? "Loading workouts..." : "Updating results..."}
-                </Text>
+                <ActivityIndicator color="#000" />
+                {/* <Text style={styles.loaderText}>
+                  {isLoading || (isRefetching && "Searching for workouts...")}
+                </Text> */}
               </View>
             </Animated.View>
 
@@ -315,21 +315,23 @@ export default function Page() {
               style={[styles.masonryContainer, { opacity: fadeAnim }]}
             >
               {/* First column */}
-              <View style={styles.masonryColumn}>
+              <View
+                style={(styles.masonryColumn, { flex: 1, paddingRight: 2 })}
+              >
                 {columnOne.map((workout) => (
                   <WorkoutCard key={workout.id} workout={workout} />
                 ))}
               </View>
 
               {/* Second column */}
-              <View style={styles.masonryColumn}>
+              <View style={(styles.masonryColumn, { flex: 1, paddingLeft: 2 })}>
                 {columnTwo.map((workout) => (
                   <WorkoutCard key={workout.id} workout={workout} />
                 ))}
               </View>
 
               {/* No results message */}
-              {allWorkouts.length === 0 && !isLoading && (
+              {allWorkouts.length === 0 && !isLoading && !isRefetching && (
                 <View style={styles.noResultsContainer}>
                   <Text style={styles.noResultsText}>No workouts found</Text>
                 </View>
@@ -406,7 +408,6 @@ const styles = StyleSheet.create({
   },
   activeCategory: {
     borderColor: "#333",
-    backgroundColor: "#f4f4f4",
   },
   categoryText: {
     fontSize: 14,
@@ -421,25 +422,15 @@ const styles = StyleSheet.create({
     top: 0,
     left: 0,
     right: 0,
-    height: 400,
+    height: "100%",
     alignItems: "center",
     backgroundColor: "rgba(255, 255, 255, 0.8)",
     zIndex: 10,
-    borderRadius: 12,
   },
   customLoader: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "white",
-    paddingVertical: 12,
-    paddingHorizontal: 20,
-    borderRadius: 10,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
-    marginTop: 40,
+    marginTop: "50%",
   },
   loaderText: {
     marginLeft: 10,
@@ -468,18 +459,18 @@ const styles = StyleSheet.create({
     minHeight: 300,
   },
   masonryColumn: {
-    width: "48%",
+    width: "50%",
   },
   workoutItem: {
-    backgroundColor: "#f4f6f6",
-    borderRadius: 8,
+    backgroundColor: "#fafafa",
+    borderRadius: 6,
     padding: 12,
-    marginBottom: 14,
+    marginBottom: 4,
   },
   workoutTitle: {
     fontWeight: "bold",
-    fontSize: 16,
-    marginBottom: 4,
+    fontSize: 14,
+    marginBottom: 6,
   },
   workoutDescription: {
     color: "#898989",

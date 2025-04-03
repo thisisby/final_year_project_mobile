@@ -178,7 +178,7 @@ export default function Page(): JSX.Element {
     >
       <View style={styles.header}>
         <TouchableOpacity onPress={() => navigation.goBack()}>
-          <ArrowSquareLeftIcon width={36} height={36} />
+          <ArrowSquareLeftIcon width={34} height={34} />
         </TouchableOpacity>
         <View>
           <Text style={styles.headerHeading}>Report</Text>
@@ -189,7 +189,7 @@ export default function Page(): JSX.Element {
         </View>
         <View>
           <TouchableOpacity onPress={() => router.push(`/modal/calendar-list`)}>
-            <CalendarLinearIcon />
+            <CalendarLinearIcon width={32} height={32} />
           </TouchableOpacity>
         </View>
       </View>
@@ -522,9 +522,9 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
   },
   headerHeading: {
-    fontWeight: "700",
-    fontSize: 16,
-    textAlign: "center",
+    fontWeight: 900,
+    fontSize: 18,
+    textTransform: "uppercase",
   },
   card3: {
     paddingVertical: 4,

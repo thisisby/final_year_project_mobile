@@ -44,6 +44,7 @@ export default function Page() {
   const usernameInputRef = useRef();
   const bioInputRef = useRef();
 
+  const changeUser = useUserStore((state) => state.changeUser);
   const { changeAvatar, isLoading: isAvatarLoading } = useChangeAvatar();
   const { patchUser, isLoading: isPatchLoading } = usePatchUser();
 
@@ -94,14 +95,20 @@ export default function Page() {
   };
 
   const handleSave = async () => {
-    await patchUser({
+    const data = await patchUser({
       id: userData.payload.id,
       patchUser: {
         username,
         bio,
-        email,
       },
     });
+
+    if (data?.success) {
+      changeUser({
+        username,
+        bio,
+      });
+    }
   };
 
   if (isLoading) {

@@ -174,7 +174,7 @@ export default function Page() {
         <>
           <View style={styles.header}>
             <TouchableOpacity onPress={() => navigation.goBack()}>
-              <ArrowSquareLeftIcon width={30} height={30} />
+              <ArrowSquareLeftIcon width={34} height={34} />
             </TouchableOpacity>
 
             <View>
@@ -183,9 +183,9 @@ export default function Page() {
             <View>
               <TouchableOpacity onPress={toggleDropdown}>
                 {isDropdownVisible ? (
-                  <CloseSquareIcon width={30} height={30} />
+                  <CloseSquareIcon width={34} height={34} />
                 ) : (
-                  <SettingLinearIcon width={30} height={30} />
+                  <SettingLinearIcon width={34} height={34} />
                 )}
               </TouchableOpacity>
             </View>
@@ -495,9 +495,9 @@ const styles = StyleSheet.create({
     marginTop: 10,
   },
   headerHeading: {
-    fontWeight: "700",
-    fontSize: 16,
-    textAlign: "center",
+    fontWeight: 900,
+    fontSize: 18,
+    textTransform: "uppercase",
   },
   input: {
     width: "100%",

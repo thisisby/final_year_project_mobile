@@ -66,7 +66,7 @@ const CalendarScreen = () => {
     <View style={styles.container}>
       <View style={styles.header}>
         <TouchableOpacity onPress={() => navigation.goBack()}>
-          <CloseSquareIcon width={36} height={36} />
+          <CloseSquareIcon width={34} height={34} />
         </TouchableOpacity>
       </View>
       <View style={{ flex: 1, backgroundColor: "#fff" }}>

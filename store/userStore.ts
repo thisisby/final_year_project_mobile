@@ -6,6 +6,7 @@ interface IUser {
   id: number;
   email: string;
   username: string;
+  bio: string;
 }
 
 type State = {
@@ -15,6 +16,7 @@ type State = {
 type Action = {
   saveUser: (user: IUser) => void;
   clearUser: () => void;
+  changeUser: (user: Partial<IUser>) => void;
 };
 
 export const useUserStore = create(
@@ -23,6 +25,8 @@ export const useUserStore = create(
       user: null,
       saveUser: (user: IUser) => set({ user }),
       clearUser: () => set({ user: null }),
+      changeUser: (user: Partial<IUser>) =>
+        set((state) => ({ user: { ...state.user, ...user } })),
     }),
     {
       name: "user-storage",

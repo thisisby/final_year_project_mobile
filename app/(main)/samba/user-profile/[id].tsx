@@ -49,7 +49,7 @@ export default function Page() {
       >
         <View style={styles.header}>
           <TouchableOpacity onPress={() => navigation.goBack()}>
-            <ArrowSquareLeftIcon width={36} height={36} />
+            <ArrowSquareLeftIcon width={34} height={34} />
           </TouchableOpacity>
 
           <View>
@@ -108,6 +108,7 @@ export default function Page() {
             {workoutData?.payload?.map((workout) => {
               return (
                 <View
+                  key={workout?.id}
                   style={{
                     backgroundColor: "#fff",
                     borderRadius: 6,
@@ -228,10 +229,9 @@ const styles = StyleSheet.create({
     marginTop: 20,
     position: "relative",
   },
-
   headerHeading: {
-    fontWeight: 700,
-    fontSize: 16,
-    textAlign: "center",
+    fontWeight: 900,
+    fontSize: 18,
+    textTransform: "uppercase",
   },
 });

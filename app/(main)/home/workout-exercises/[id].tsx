@@ -127,14 +127,14 @@ export default function Page(): JSX.Element {
     >
       <View style={styles.header}>
         <TouchableOpacity onPress={() => navigation.goBack()}>
-          <ArrowSquareLeftIcon width={30} height={30} />
+          <ArrowSquareLeftIcon width={34} height={34} />
         </TouchableOpacity>
         <Text style={styles.headerHeading}>Records</Text>
         <TouchableOpacity onPress={toggleDropdown}>
           {isDropdownVisible ? (
-            <CloseSquareIcon width={30} height={30} />
+            <CloseSquareIcon width={34} height={34} />
           ) : (
-            <SettingLinearIcon width={30} height={30} />
+            <SettingLinearIcon width={34} height={34} />
           )}
         </TouchableOpacity>
       </View>
@@ -322,7 +322,11 @@ const styles = StyleSheet.create({
     marginBottom: 20,
     marginTop: 10,
   },
-  headerHeading: { fontWeight: "700", fontSize: 16 },
+  headerHeading: {
+    fontWeight: 900,
+    fontSize: 18,
+    textTransform: "uppercase",
+  },
   overlay: {
     position: "absolute",
     top: 0,

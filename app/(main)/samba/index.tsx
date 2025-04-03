@@ -136,15 +136,15 @@ export default function Page() {
           pointerEvents={isLoading || isRefetching ? "auto" : "none"}
         >
           <View style={styles.customLoader}>
-            <ActivityIndicator size="small" color="#6371f6" />
-            <Text style={styles.loaderText}>
+            <ActivityIndicator color="#000" />
+            {/* <Text style={styles.loaderText}>
               {isLoading ? "Loading people..." : "Updating results..."}
-            </Text>
+            </Text> */}
           </View>
         </Animated.View>
 
         <Animated.View style={[styles.masonryContainer, { opacity: fadeAnim }]}>
-          <View style={styles.masonryColumn}>
+          <View style={(styles.masonryColumn, { paddingRight: 2, flex: 1 })}>
             {columnOne.map((workout, idx) => (
               <TouchableOpacity
                 key={idx}
@@ -160,6 +160,7 @@ export default function Page() {
                     width: 50,
                     height: 50,
                     backgroundColor: "#efefef",
+                    padding: 4,
                     borderRadius: 10,
                     marginBottom: 24,
                   }}
@@ -203,7 +204,7 @@ export default function Page() {
             ))}
           </View>
 
-          <View style={styles.masonryColumn}>
+          <View style={(styles.masonryColumn, { paddingLeft: 2, flex: 1 })}>
             {columnTwo.map((workout, idx) => (
               <TouchableOpacity
                 key={idx}
@@ -215,7 +216,8 @@ export default function Page() {
                     width: 50,
                     height: 50,
                     backgroundColor: "#efefef",
-                    borderRadius: 10,
+                    padding: 4,
+                    borderRadius: 6,
                     marginBottom: 24,
                   }}
                 >
@@ -229,7 +231,7 @@ export default function Page() {
                       width: "100%",
                       height: "100%",
                       backgroundColor: "#efefef",
-                      borderRadius: 10,
+                      borderRadius: 6,
                       overflow: "hidden",
                     }}
                   ></ImageBackground>
@@ -433,25 +435,16 @@ const styles = StyleSheet.create({
     top: 0,
     left: 0,
     right: 0,
-    height: 100,
+    height: "100%",
     justifyContent: "center",
     alignItems: "center",
     backgroundColor: "rgba(255, 255, 255, 0.8)",
     zIndex: 10,
-    borderRadius: 12,
   },
   customLoader: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "white",
-    paddingVertical: 12,
-    paddingHorizontal: 20,
-    borderRadius: 50,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
+    marginTop: "10%",
   },
   loaderText: {
     marginLeft: 10,
@@ -480,17 +473,17 @@ const styles = StyleSheet.create({
     minHeight: 300,
   },
   masonryColumn: {
-    width: "48%",
+    width: "50%",
   },
   workoutItem: {
-    backgroundColor: "#f4f6f6",
-    borderRadius: 8,
+    backgroundColor: "#fafafa",
+    borderRadius: 6,
     padding: 12,
-    marginBottom: 14,
+    marginBottom: 4,
   },
   workoutTitle: {
     fontWeight: "bold",
-    fontSize: 16,
+    fontSize: 14,
     marginBottom: 4,
   },
   workoutDescription: {

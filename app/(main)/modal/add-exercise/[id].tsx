@@ -7,6 +7,7 @@ import {
   ScrollView,
   TextInput,
   ActivityIndicator,
+  FlatList,
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import CloseSquareIcon from "@/components/ui/icons/CloseSquareIcon";
@@ -120,34 +121,42 @@ export default function Page(): JSX.Element {
 
   return (
     <View style={styles.container}>
-      <ScrollView
-        contentContainerStyle={{
-          paddingBottom: 100, // Add padding to avoid overlap with the bottom button
-        }}
-      >
-        <View style={styles.header}>
-          <TouchableOpacity onPress={() => navigation.goBack()}>
-            <CloseSquareIcon width={36} height={36} />
-          </TouchableOpacity>
-
-          <View>
-            <Text style={styles.headerHeading}>Session Types</Text>
-          </View>
-        </View>
+      <View style={styles.header}>
+        <TouchableOpacity onPress={() => navigation.goBack()}>
+          <CloseSquareIcon width={34} height={34} />
+        </TouchableOpacity>
 
         <View>
-          <TextInput
-            style={styles.input}
-            placeholder="Search for exercises"
-            placeholderTextColor="#999999"
-            value={search}
-            onChangeText={setSearch}
-            onFocus={() => setKeyboardStatus(true)}
-            onBlur={() => setKeyboardStatus(false)}
-          />
+          <Text style={styles.headerHeading}>List of exercises</Text>
+        </View>
+      </View>
 
-          <View style={styles.sectionCard}>
-            {filteredExercises.map((item) => (
+      <View>
+        <TextInput
+          style={styles.input}
+          placeholder="Search for exercises"
+          placeholderTextColor="#999999"
+          value={search}
+          onChangeText={setSearch}
+          onFocus={() => setKeyboardStatus(true)}
+          onBlur={() => setKeyboardStatus(false)}
+        />
+
+        <View style={styles.sectionCard}>
+          {search.length > 0 && (
+            <TouchableOpacity
+              style={[styles.card3]}
+              onPress={handleAddCustomExercise}
+            >
+              <View style={styles.cardContent}>
+                <AddSquareLinearIcon width={24} height={24} />
+                <Text style={styles.cardTitle}>{search}</Text>
+              </View>
+            </TouchableOpacity>
+          )}
+          <FlatList
+            data={filteredExercises}
+            renderItem={({ item }) => (
               <TouchableOpacity
                 key={item.id}
                 style={styles.card3}
@@ -172,21 +181,20 @@ export default function Page(): JSX.Element {
                   <Text style={styles.cardTitle}>{item.name}</Text>
                 </View>
               </TouchableOpacity>
-            ))}
-            {search.length > 0 && (
-              <TouchableOpacity
-                style={[styles.card3]}
-                onPress={handleAddCustomExercise}
-              >
-                <View style={styles.cardContent}>
-                  <AddSquareLinearIcon width={24} height={24} />
-                  <Text style={styles.cardTitle}>{search}</Text>
-                </View>
-              </TouchableOpacity>
             )}
-          </View>
+            contentContainerStyle={styles.flatListContent}
+            initialNumToRender={10}
+            maxToRenderPerBatch={10}
+            windowSize={10}
+            removeClippedSubviews={true}
+            getItemLayout={(data, index) => ({
+              length: 40,
+              offset: 40 * index,
+              index,
+            })}
+          />
         </View>
-      </ScrollView>
+      </View>
     </View>
   );
 }
@@ -196,6 +204,9 @@ const styles = StyleSheet.create({
     flex: 1,
     paddingHorizontal: 20,
     position: "relative", // Ensure the container is relative for absolute positioning
+  },
+  flatListContent: {
+    paddingBottom: 100,
   },
   header: {
     height: 60,
@@ -207,9 +218,9 @@ const styles = StyleSheet.create({
     marginTop: 10,
   },
   headerHeading: {
-    fontWeight: "700",
-    fontSize: 16,
-    textAlign: "right",
+    fontWeight: 900,
+    fontSize: 18,
+    textTransform: "uppercase",
   },
   headerName: {
     color: "#898989",
