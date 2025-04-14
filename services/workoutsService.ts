@@ -95,3 +95,26 @@ export const findAllWorkoutsByUserID = async (userID: number) => {
   const response = await api.get(`/users/${userID}/workouts`);
   return response.data;
 };
+
+export const likeWorkout = async (workoutID: number) => {
+  try {
+    const response = await api.post(`/workouts/${workoutID}/like`);
+    return response.data;
+  } catch (error) {
+    console.error("Error liking workout:", error);
+  }
+};
+
+export type GenerateAIWorkoutRequest = {
+  level: string;
+  goal: string;
+  body_areas: string[];
+  gender: string;
+  age: string;
+  details: string;
+};
+
+export const generateAIWorkout = async (data: GenerateAIWorkoutRequest) => {
+  const response = await api.post("/workouts-ai/generate", data);
+  return response.data;
+};

@@ -7,9 +7,12 @@ import {
   patchWorkout,
   copyWorkout,
   findAllWorkoutsByUserID,
+  likeWorkout,
+  generateAIWorkout,
 } from "@/services/workoutsService";
 import { useUserStore } from "@/store/userStore";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import Toast from "react-native-toast-message";
 
 export function useWorkouts() {
   const { user } = useUserStore();
@@ -108,4 +111,38 @@ export function useFindAllWorkoutsByUserID(userID: number) {
       console.error("user workouts error", error);
     },
   });
+}
+
+export function useLikeWorkout() {
+  const mutation = useMutation(likeWorkout, {
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: ["workouts"] });
+      queryClient.invalidateQueries({ queryKey: ["explore-workout-by-id"] });
+    },
+    onError: (error) => {
+      console.error("workout like error", error);
+    },
+  });
+
+  return {
+    likeWorkout: mutation.mutateAsync,
+    isLoading: mutation.isLoading,
+  };
+}
+
+export function useGenerateAIWorkout() {
+  const mutation = useMutation(generateAIWorkout, {
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: ["workouts"] });
+      queryClient.invalidateQueries({ queryKey: ["explore-workout-by-id"] });
+    },
+    onError: (error) => {
+      console.error("workout generate error", error);
+    },
+  });
+
+  return {
+    generateAIWorkout: mutation.mutateAsync,
+    isLoading: mutation.isLoading,
+  };
 }

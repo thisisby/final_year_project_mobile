@@ -1,5 +1,11 @@
 import CloseSquareIcon from "@/components/ui/icons/CloseSquareIcon";
-import { useCopyWorkout, useGetWorkoutByID } from "@/hooks/useWorkouts";
+import HeartBoldIcon from "@/components/ui/icons/HeartBoldIcon";
+import HeartLinearIcon from "@/components/ui/icons/HeartLinearIcon";
+import {
+  useCopyWorkout,
+  useGetWorkoutByID,
+  useLikeWorkout,
+} from "@/hooks/useWorkouts";
 import { useLocalSearchParams, useNavigation, useRouter } from "expo-router";
 import React, { useEffect, useState, useRef } from "react";
 import {
@@ -25,6 +31,7 @@ export default function Page() {
 
   const { data: workout, isLoading } = useGetWorkoutByID(Number(id));
   const { copyWorkout, isLoading: isCopyLoading } = useCopyWorkout();
+  const { likeWorkout, isLoading: isLikeLoading } = useLikeWorkout();
 
   const handleCopyWorkout = async () => {
     const res = await copyWorkout(Number(id));
@@ -130,6 +137,31 @@ export default function Page() {
                 borderRadius: 10,
                 flex: 1,
               }}
+              onPress={() => {
+                likeWorkout(Number(id));
+              }}
+            >
+              <View
+                style={{
+                  alignItems: "center",
+                  display: "flex",
+                  justifyContent: "center",
+                }}
+              >
+                <HeartBoldIcon width={24} height={24} color="#991b1b" />
+              </View>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={{
+                backgroundColor: "#efefef",
+                padding: 10,
+                paddingVertical: 14,
+                borderRadius: 10,
+                flex: 4,
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+              }}
               onPress={handleCopyWorkout}
             >
               {isCopyLoading ? (
@@ -146,25 +178,19 @@ export default function Page() {
                 </Text>
               )}
             </TouchableOpacity>
-            <TouchableOpacity
+          </View>
+
+          <View>
+            <Text
               style={{
-                backgroundColor: "#efefef",
-                padding: 10,
-                paddingVertical: 14,
-                borderRadius: 10,
-                flex: 1,
+                textAlign: "center",
+                color: "#991b1b",
+                fontSize: 12,
+                fontWeight: "bold",
               }}
             >
-              <Text
-                style={{
-                  fontWeight: "bold",
-                  textAlign: "center",
-                  color: "#991b1b",
-                }}
-              >
-                Like (233)
-              </Text>
-            </TouchableOpacity>
+              Total likes: {workout?.payload?.likes_count}
+            </Text>
           </View>
 
           {/* <View style={{ padding: 10, borderRadius: 10 }}>

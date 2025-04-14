@@ -94,7 +94,12 @@ export default function Page(): JSX.Element {
               <ArrowSquareLeftIcon width={34} height={34} />
             </TouchableOpacity>
             <View>
-              <Text style={styles.headerHeading}>
+              <Text
+                style={[
+                  styles.headerHeading,
+                  workout?.payload?.title.length > 20 ? { fontSize: 14 } : {},
+                ]}
+              >
                 {workout?.payload?.title}
               </Text>
             </View>

@@ -5,7 +5,7 @@ import { useUserStore } from "@/store/userStore";
 import { router } from "expo-router";
 
 // const BASE_URL = "http://3.87.183.239/api/v1";
-const BASE_URL = `http://192.168.0.207:8080/api/v1`;
+const BASE_URL = `http://192.168.2.65:8080/api/v1`;
 
 const api = axios.create({
   baseURL: BASE_URL,
