@@ -9,6 +9,7 @@ import {
   findAllWorkoutsByUserID,
   likeWorkout,
   generateAIWorkout,
+  purchaseWorkout,
 } from "@/services/workoutsService";
 import { useUserStore } from "@/store/userStore";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -143,6 +144,23 @@ export function useGenerateAIWorkout() {
 
   return {
     generateAIWorkout: mutation.mutateAsync,
+    isLoading: mutation.isLoading,
+  };
+}
+
+export function usePurchaseWorkout() {
+  const mutation = useMutation(purchaseWorkout, {
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: ["workouts"] });
+      queryClient.invalidateQueries({ queryKey: ["explore-workout-by-id"] });
+    },
+    onError: (error) => {
+      console.error("workout purchase error", error);
+    },
+  });
+
+  return {
+    purchaseWorkout: mutation.mutateAsync,
     isLoading: mutation.isLoading,
   };
 }

@@ -81,7 +81,7 @@ export default function Page() {
           <Text style={styles.headerHeading}>Graphs</Text>
         </View>
         <View>
-          <SettingLinearIcon width={30} height={30} />
+          <SettingLinearIcon width={34} height={34} color="#d4d4d8" />
         </View>
       </View>
 
@@ -303,8 +303,8 @@ const styles = StyleSheet.create({
   },
   headerTitle: { fontSize: 18, fontWeight: "bold" },
   headerHeading: {
-    fontWeight: 700,
-    fontSize: 16,
-    textAlign: "right",
+    fontWeight: 900,
+    fontSize: 18,
+    textTransform: "uppercase",
   },
 });

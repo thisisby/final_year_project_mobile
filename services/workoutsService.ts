@@ -91,6 +91,24 @@ export const copyWorkout = async (workoutID: number) => {
   return response.data;
 };
 
+type PurchaseWorkoutParams = {
+  workout_id: number;
+  card_number: string;
+  card_cvv: string;
+  card_expiry_month: string;
+  card_expiry_year: string;
+};
+
+export const purchaseWorkout = async (
+  purchaseWorkout: PurchaseWorkoutParams
+) => {
+  const response = await api.post(
+    `/workouts/${purchaseWorkout.workout_id}/purchase`,
+    purchaseWorkout
+  );
+  return response.data;
+};
+
 export const findAllWorkoutsByUserID = async (userID: number) => {
   const response = await api.get(`/users/${userID}/workouts`);
   return response.data;

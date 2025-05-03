@@ -163,7 +163,7 @@ export default function Page() {
                       {workout?.price === 0 ? (
                         <TouchableOpacity
                           style={{
-                            backgroundColor: "#bbf7d0",
+                            backgroundColor: "#000",
                             padding: 10,
                             borderRadius: 6,
                             width: "100%",
@@ -177,6 +177,7 @@ export default function Page() {
                               fontSize: 14,
                               fontWeight: "bold",
                               textAlign: "center",
+                              color: "#fff",
                             }}
                           >
                             View
@@ -185,11 +186,14 @@ export default function Page() {
                       ) : (
                         <TouchableOpacity
                           style={{
-                            backgroundColor: "#bbf7d0",
+                            backgroundColor: "#a7f3d0",
                             padding: 10,
                             borderRadius: 6,
                             width: "100%",
                           }}
+                          onPress={() =>
+                            router.push(`/modal/purchase/${workout?.id}`)
+                          }
                         >
                           <Text
                             style={{

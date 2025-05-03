@@ -69,31 +69,35 @@ export default function Page(): JSX.Element {
       <View style={styles.habbit}>
         <View style={styles.habbitItem}>
           <TouchableOpacity
-            style={[styles.card, { backgroundColor: "#fffef2" }]}
+            style={[styles.card, { backgroundColor: "#fef2f2" }]}
             onPress={() => router.push("/modal/create-new")}
           >
-            <View style={{ marginBottom: 20 }}>
-              <NoteIcon width={28} height={28} />
+            <View style={{ marginBottom: 26 }}>
+              <NoteIcon width={34} height={34} color="#ef4444" />
             </View>
             <View>
-              <Text style={styles.cardTitle}>Create New List</Text>
-              <Text style={{ color: "#898989", fontSize: 12 }}>
-                22 list generated
+              <Text style={[styles.cardTitle, { color: "#ef4444" }]}>
+                Create New Plan
+              </Text>
+              <Text style={{ color: "#f87171", fontSize: 12 }}>
+                {data?.payload?.length} plans generated
               </Text>
             </View>
           </TouchableOpacity>
         </View>
         <View style={styles.habbitItem}>
           <TouchableOpacity
-            style={[styles.card, { backgroundColor: "#fef1fa" }]}
+            style={[styles.card, { backgroundColor: "#f2eefd" }]}
             onPress={() => router.push("/modal/create-new-ai")}
           >
-            <View style={{ marginBottom: 20 }}>
-              <MagicPenIcon width={28} height={28} />
+            <View style={{ marginBottom: 26 }}>
+              <MagicPenIcon width={34} height={34} color="#7a77c4" />
             </View>
             <View>
-              <Text style={styles.cardTitle}>Generate with AI</Text>
-              <Text style={{ color: "#898989", fontSize: 12 }}>
+              <Text style={[styles.cardTitle, { color: "#7a77c4" }]}>
+                Generate with AI
+              </Text>
+              <Text style={{ color: "#9798D3", fontSize: 12 }}>
                 60% of users used
               </Text>
             </View>
@@ -139,7 +143,7 @@ export default function Page(): JSX.Element {
                   style={{
                     padding: 4,
                     borderRadius: 6,
-                    backgroundColor: "#f1f1f1",
+                    backgroundColor: "#fef3c7",
                   }}
                 >
                   <NoteLinearIcon width={24} height={24} />

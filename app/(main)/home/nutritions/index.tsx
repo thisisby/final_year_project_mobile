@@ -136,7 +136,7 @@ export default function Page(): JSX.Element {
                   style={{
                     padding: 4,
                     borderRadius: 6,
-                    backgroundColor: "#f1f1f1",
+                    backgroundColor: "#fef3c7",
                   }}
                 >
                   <BubbleLinearIcon width={24} height={24} />

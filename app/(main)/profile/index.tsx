@@ -92,7 +92,7 @@ export default function Page() {
             alignItems: "center",
             marginBottom: 8,
           }}
-          onPress={() => router.push(`/home/sessions/1`)}
+          onPress={() => router.push(`/profile/security`)}
         >
           <View>
             <Text style={styles.cardTitle}>Security</Text>
@@ -114,7 +114,7 @@ export default function Page() {
             alignItems: "center",
             marginBottom: 8,
           }}
-          onPress={() => router.push(`/home/sessions/1`)}
+          onPress={() => router.push(`/profile/faq`)}
         >
           <View>
             <Text style={styles.cardTitle}>FAQ</Text>

@@ -7,6 +7,8 @@ interface IUser {
   email: string;
   username: string;
   bio: string;
+  cardPAN: string;
+  avatar: string;
 }
 
 type State = {

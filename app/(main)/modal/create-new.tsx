@@ -9,6 +9,7 @@ import {
   Platform,
   ActivityIndicator,
   Switch,
+  KeyboardAvoidingView,
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import CloseSquareIcon from "@/components/ui/icons/CloseSquareIcon";
@@ -24,6 +25,8 @@ import {
   useMyExercises,
 } from "@/hooks/useExercise";
 import { CreateWorkoutRequest } from "@/services/workoutsService";
+import { ScrollView } from "react-native-gesture-handler";
+import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 
 // Define types outside of component for better performance
 interface ExerciseListItem {
@@ -253,7 +256,7 @@ export default function Page(): JSX.Element {
 
       {stage === 1 ? (
         // Stage 1: Workout Name and Description
-        <View>
+        <KeyboardAwareScrollView>
           <Text style={styles.label}>Name</Text>
           <TextInput
             style={[styles.input, styles.marginBottom]}
@@ -304,7 +307,7 @@ export default function Page(): JSX.Element {
           >
             <Text style={styles.continueText}>Continue</Text>
           </TouchableOpacity>
-        </View>
+        </KeyboardAwareScrollView>
       ) : (
         // Stage 2: Search and Exercise Selection
         <View style={styles.exerciseContainer}>

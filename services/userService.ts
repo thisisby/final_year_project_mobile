@@ -32,6 +32,7 @@ type PatchUser = {
   username?: string;
   email?: string;
   bio?: string;
+  card_pan?: string;
 };
 
 interface PatchUserParams {

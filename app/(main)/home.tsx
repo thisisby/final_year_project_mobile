@@ -51,9 +51,9 @@ export default function Page() {
       style={styles.container}
     >
       <View style={styles.header}>
-        <Avatar title={user.email} />
+        <Avatar title={user.avatar} />
         <View>
-          <Text style={styles.headerHeading}>Good Morning!</Text>
+          <Text style={styles.headerHeading}>Welcome Back!</Text>
           <Text style={styles.headerName}>{user.username}</Text>
         </View>
       </View>
@@ -87,7 +87,9 @@ export default function Page() {
               onPress={() => router.push("/home/daily-report")}
             >
               <View style={{ marginBottom: 30 }}>
-                <Text style={styles.cardTitle}>Daily Report</Text>
+                <Text style={[styles.cardTitle, { color: "#3D3E3E" }]}>
+                  Daily Report
+                </Text>
               </View>
               <View
                 style={{
@@ -95,12 +97,12 @@ export default function Page() {
                   alignItems: "flex-end",
                 }}
               >
-                <ChartIcon width={36} height={36} color="#5c9782" />
+                <ChartIcon width={36} height={36} color="#3D3E3E" />
               </View>
             </TouchableOpacity>
 
             <TouchableOpacity
-              style={[styles.card, { backgroundColor: "#ebf8fd" }]}
+              style={[styles.card, { backgroundColor: "#fff7ed" }]}
               onPress={() => router.push("/home/workouts")}
             >
               <View
@@ -111,8 +113,10 @@ export default function Page() {
                 <WorkoutIcon width={60} height={60} />
               </View>
               <View>
-                <Text style={styles.cardTitle}>Workouts</Text>
-                <Text style={{ color: "#898989", fontSize: 12 }}>
+                <Text style={[styles.cardTitle, { color: "#f97316" }]}>
+                  Workouts
+                </Text>
+                <Text style={{ color: "#f97316", fontSize: 12 }}>
                   {data?.payload?.length} workout guides
                 </Text>
               </View>
@@ -120,7 +124,7 @@ export default function Page() {
           </View>
           <View style={styles.habbitItem}>
             <TouchableOpacity
-              style={[styles.card, { backgroundColor: "#fef1fa" }]}
+              style={[styles.card, { backgroundColor: "#cffafe" }]}
               onPress={() => router.push("/home/sessions")}
             >
               <View
@@ -131,18 +135,22 @@ export default function Page() {
                 <SessionIcon width={60} height={60} />
               </View>
               <View>
-                <Text style={styles.cardTitle}>Sessions</Text>
-                <Text style={{ color: "#898989", fontSize: 12 }}>
+                <Text style={[styles.cardTitle, { color: "#0891b2" }]}>
+                  Sessions
+                </Text>
+                <Text style={{ color: "#0891b2", fontSize: 12 }}>
                   {sessions?.length} sessions saved
                 </Text>
               </View>
             </TouchableOpacity>
             <TouchableOpacity
-              style={[styles.card, { backgroundColor: "#e1f4e2" }]}
+              style={[styles.card, { backgroundColor: "#dcfce7" }]}
               onPress={() => router.push("/home/nutritions")}
             >
               <View style={{ marginBottom: 24 }}>
-                <Text style={styles.cardTitle}>Nutrition</Text>
+                <Text style={[styles.cardTitle, { color: "#15803d" }]}>
+                  Nutrition
+                </Text>
               </View>
               <View
                 style={{
@@ -150,7 +158,7 @@ export default function Page() {
                   alignItems: "flex-end",
                 }}
               >
-                <NutritionIcon width={40} height={40} color="#057dcd" />
+                <NutritionIcon width={40} height={40} color="#15803d" />
               </View>
             </TouchableOpacity>
           </View>

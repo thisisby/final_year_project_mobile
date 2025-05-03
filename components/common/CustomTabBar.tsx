@@ -41,6 +41,7 @@ import {
 import { useSessionDetailsStore } from "@/store/sessionDetailsStore";
 import { useUpdateNutrition } from "@/hooks/useNutritions";
 import { useNutritionStore } from "@/store/nutritionStore";
+import PeopleBoldIcon from "../ui/icons/PeopleBoldIcon";
 const { width } = Dimensions.get("window");
 
 export default function CustomTabBar() {
@@ -171,7 +172,7 @@ export default function CustomTabBar() {
   const tabs = [
     { href: "/home", icon: HomeIcon },
     { href: "/explore", icon: NoteIcon },
-    { href: "/samba", icon: SmsIcon },
+    { href: "/samba", icon: PeopleBoldIcon },
     { href: "/profile", icon: UserIcon },
   ];
 

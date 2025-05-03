@@ -55,6 +55,7 @@ export default function Page(): JSX.Element {
             setCurrentExercise({
               ...exercise.exercise,
               link: exercise.secondary_note,
+              mainNote: exercise.main_note,
             });
           }
         });
@@ -254,12 +255,36 @@ export default function Page(): JSX.Element {
         </TouchableWithoutFeedback>
       )}
 
+      {currentExercise?.mainNote.length > 0 && (
+        <View
+          style={{
+            marginBottom: 20,
+            borderRadius: 10,
+            padding: 10,
+            flexDirection: "column",
+          }}
+        >
+          <View>
+            <Text
+              style={{
+                color: "#666",
+                lineHeight: 18,
+                letterSpacing: 0.4,
+              }}
+              ellipsizeMode="tail"
+            >
+              {currentExercise?.mainNote}
+            </Text>
+          </View>
+        </View>
+      )}
+
       <View style={{ marginBottom: 20 }}>
         <TouchableOpacity
           style={styles.analyticsButton}
           onPress={() => router.push(`/home/analytics/${id}`)}
         >
-          <View style={styles.iconContainer}>
+          <View style={[styles.iconContainer, { backgroundColor: "#dbeafe" }]}>
             <ActivityLinearIcon width={22} height={22} />
           </View>
           <View style={styles.cardContent}>
@@ -268,7 +293,7 @@ export default function Page(): JSX.Element {
         </TouchableOpacity>
 
         <TouchableOpacity style={styles.oneRMButton}>
-          <View style={styles.iconContainer}>
+          <View style={[styles.iconContainer, { backgroundColor: "#d1fae5" }]}>
             <FlashCircleLinearIcon width={22} height={22} />
           </View>
           <View style={styles.cardContent}>

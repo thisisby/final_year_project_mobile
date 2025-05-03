@@ -74,7 +74,10 @@ export default function Page() {
           name: `avatar-${Date.now()}.jpg`, // Unique filename
           type: "image/jpeg", // Adjust based on the actual image type
         };
-        await changeAvatar(avatar);
+        const url = await changeAvatar(avatar);
+        if (url) {
+          changeUser({ avatar: url.payload.avatar });
+        }
         setImage(result.assets[0].uri);
       } catch (e) {
         alert("Upload failed");
@@ -141,14 +144,14 @@ export default function Page() {
           >
             <View>
               <TouchableOpacity onPress={() => navigation.goBack()}>
-                <ArrowSquareLeftIcon width={30} height={30} />
+                <ArrowSquareLeftIcon width={34} height={34} />
               </TouchableOpacity>
             </View>
             <Text
               style={{
-                fontWeight: "800",
-                fontSize: 20,
-                marginBottom: 0,
+                fontWeight: 900,
+                fontSize: 18,
+                textTransform: "uppercase",
               }}
             >
               General
