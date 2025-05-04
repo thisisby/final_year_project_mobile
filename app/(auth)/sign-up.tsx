@@ -30,7 +30,7 @@ export default function LoginScreen() {
       behavior={Platform.OS === "ios" ? "padding" : "height"}
       style={styles.container}
     >
-      <Text style={styles.logo}>oox.clubs</Text>
+      <Text style={styles.logo}>fit.guide</Text>
       <Text style={styles.title}>Sign Up</Text>
       <Text style={styles.subtitle}>
         Enter your email and password to register in app
@@ -43,6 +43,7 @@ export default function LoginScreen() {
         onChangeText={setEmail}
         keyboardType="email-address"
         autoCapitalize="none"
+        secureTextEntry={true}
       />
       <View style={styles.passwordContainer}>
         <TextInput
@@ -60,6 +61,7 @@ export default function LoginScreen() {
           placeholderTextColor="#999999"
           value={confirmPassword}
           onChangeText={setConfirmPassword}
+          secureTextEntry={true}
         />
       </View>
 

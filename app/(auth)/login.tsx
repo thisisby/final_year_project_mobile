@@ -30,7 +30,7 @@ export default function LoginScreen() {
       behavior={Platform.OS === "ios" ? "padding" : "height"}
       style={styles.container}
     >
-      <Text style={styles.logo}>oox.clubs</Text>
+      <Text style={styles.logo}>fit.guide</Text>
       <Text style={styles.title}>Log in</Text>
       <Text style={styles.subtitle}>
         Enter your email and password to use the app
@@ -54,6 +54,7 @@ export default function LoginScreen() {
           value={password}
           onChangeText={setPassword}
           autoComplete="password"
+          secureTextEntry={true}
         />
       </View>
 

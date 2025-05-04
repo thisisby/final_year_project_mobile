@@ -90,7 +90,7 @@ export default function Page() {
             </View>
           </View>
 
-          <Text
+          {/* <Text
             style={{
               fontWeight: 800,
               fontSize: 20,
@@ -102,9 +102,9 @@ export default function Page() {
           >
             Coming soon! {"\n"} This feature is not yet available. Please check
             back later.
-          </Text>
+          </Text> */}
 
-          {/* <View
+          <View
             style={{
               marginBottom: 10,
               borderRadius: 10,
@@ -245,7 +245,7 @@ export default function Page() {
                 {isLoading ? "Loading..." : "Purchase"}
               </Text>
             </TouchableOpacity>
-          </View> */}
+          </View>
         </ScrollView>
       </KeyboardAwareScrollView>
     </View>
