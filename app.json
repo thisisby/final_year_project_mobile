@@ -20,8 +20,11 @@
       },
       "infoPlist": {
         "NSCameraUsageDescription": "This app needs camera access to take photos.",
-        "ITSAppUsesNonExemptEncryption": false
+        "NSAppTransportSecurity": {
+          "NSAllowsArbitraryLoads": true
+        }
       },
+
       "supportsTablet": true
     },
     "android": {
@@ -30,7 +33,13 @@
         "backgroundColor": "#ffffff"
       },
       "softwareKeyboardLayoutMode": "pan",
-      "windowSoftInputMode": "stateAlwaysHidden|adjustPan"
+      "windowSoftInputMode": "stateAlwaysHidden|adjustPan",
+      "infoPlist": {
+        "NSCameraUsageDescription": "This app needs camera access to take photos.",
+        "NSAppTransportSecurity": {
+          "NSAllowsArbitraryLoads": true
+        }
+      }
     },
     "web": {
       "bundler": "metro",
